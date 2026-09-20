@@ -1,0 +1,16 @@
+<!--
+  The Dodo mark: a dodo reduced to overlapping primitives — a near-circular body, a smaller head,
+  a tapering bill with one downturned hook, a blunt tail tuft and two stub legs. They are a single
+  <path> so nonZero fill unions them into one solid silhouette with no seams.
+
+  Every subpath is wound clockwise; the eye is wound the other way so it punches a hole. The eye
+  therefore has to sit where only the head covers it — over head *and* bill the windings would
+  cancel to 1 and it would never show.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M16.55,13.15 C16.55,16.85 13.55,19.85 9.85,19.85 C6.15,19.85 3.15,16.85 3.15,13.15 C3.15,9.45 6.15,6.45 9.85,6.45 C13.55,6.45 16.55,9.45 16.55,13.15 Z M18.65,6.25 C18.65,8.46 16.86,10.25 14.65,10.25 C12.44,10.25 10.65,8.46 10.65,6.25 C10.65,4.04 12.44,2.25 14.65,2.25 C16.86,2.25 18.65,4.04 18.65,6.25 Z M15.95,4.35 C19.35,4.35 22.55,5.95 23.25,7.95 C23.65,9.05 23.05,9.95 22.05,9.95 C21.25,9.95 20.65,9.35 20.35,8.55 C19.15,8.65 17.75,8.55 16.75,8.35 Z M5.55,13.35 C3.95,12.55 2.15,10.95 1.15,9.35 C0.35,8.05 0.55,6.75 1.55,6.65 C2.75,6.55 5.35,7.75 7.75,9.15 Z M5.95,17.35 L8.95,17.35 L8.95,20.15 C8.95,21.15 8.25,21.75 7.45,21.75 C6.65,21.75 5.95,21.15 5.95,20.15 Z M11.55,17.35 L14.55,17.35 L14.55,20.15 C14.55,21.15 13.85,21.75 13.05,21.75 C12.25,21.75 11.55,21.15 11.55,20.15 Z M14.40,4.85 C14.40,4.27 13.93,3.80 13.35,3.80 C12.77,3.80 12.30,4.27 12.30,4.85 C12.30,5.43 12.77,5.90 13.35,5.90 C13.93,5.90 14.40,5.43 14.40,4.85 Z" />
+</vector>
