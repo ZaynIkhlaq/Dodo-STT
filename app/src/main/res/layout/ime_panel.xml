@@ -1,77 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  One orb, a caption, and a hairline shelf of utility keys. The orb is optically centred: the
+  discard button on the left is balanced by an equal-width Space on the right, so nothing shifts
+  when discard appears and disappears mid-dictation.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/panel"
+    android:background="@color/bg"
     android:orientation="vertical"
-    android:paddingStart="12dp"
+    android:paddingStart="14dp"
     android:paddingTop="18dp"
-    android:paddingEnd="12dp"
-    android:paddingBottom="18dp">
+    android:paddingEnd="14dp"
+    android:paddingBottom="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btn_cancel"
+            style="@style/PanelKey"
+            android:contentDescription="@string/cd_cancel"
+            android:src="@drawable/ic_close"
+            android:visibility="invisible" />
+
+        <com.zaynikhlaq.dodostt.MicButtonView
+            android:id="@+id/mic"
+            android:layout_width="104dp"
+            android:layout_height="104dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:contentDescription="@string/cd_mic" />
+
+        <Space
+            android:layout_width="48dp"
+            android:layout_height="48dp" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/status"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
         android:ellipsize="end"
+        android:fontFamily="sans-serif"
         android:gravity="center"
+        android:letterSpacing="-0.01"
         android:maxLines="2"
         android:text="@string/status_idle"
-        android:textColor="@color/panel_text"
-        android:textSize="15sp" />
+        android:textColor="@color/text_secondary"
+        android:textSize="14sp" />
+
+    <View
+        style="@style/Hairline"
+        android:layout_marginTop="16dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="4dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/btn_keyboard"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            style="@style/PanelKey"
             android:contentDescription="@string/cd_keyboard"
-            android:src="@drawable/ic_keyboard"
-            android:tint="@color/panel_icon" />
+            android:src="@drawable/ic_keyboard" />
 
-        <ImageButton
-            android:id="@+id/btn_cancel"
+        <Space
             android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/cd_cancel"
-            android:src="@drawable/ic_close"
-            android:tint="@color/panel_icon"
-            android:visibility="invisible" />
-
-        <com.zaynikhlaq.dodostt.MicButtonView
-            android:id="@+id/mic"
-            android:layout_width="128dp"
-            android:layout_height="128dp"
-            android:contentDescription="@string/cd_mic" />
-
-        <ImageButton
-            android:id="@+id/btn_enter"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/cd_enter"
-            android:src="@drawable/ic_enter"
-            android:tint="@color/panel_icon" />
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btn_backspace"
-            android:layout_width="0dp"
-            android:layout_height="56dp"
-            android:layout_weight="1"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
+            style="@style/PanelKey"
             android:contentDescription="@string/cd_backspace"
-            android:src="@drawable/ic_backspace"
-            android:tint="@color/panel_icon" />
+            android:src="@drawable/ic_backspace" />
+
+        <ImageButton
+            android:id="@+id/btn_enter"
+            style="@style/PanelKey"
+            android:layout_marginStart="6dp"
+            android:contentDescription="@string/cd_enter"
+            android:src="@drawable/ic_enter" />
     </LinearLayout>
 </LinearLayout>

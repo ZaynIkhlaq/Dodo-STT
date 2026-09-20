@@ -52,4 +52,8 @@ object Prefs {
 
     fun autoReturn(c: Context): Boolean = sp(c).getBoolean("auto_return", false)
     fun setAutoReturn(c: Context, v: Boolean) = sp(c).edit().putBoolean("auto_return", v).apply()
+
+    /** False until the user has been walked through setup once. */
+    fun onboarded(c: Context): Boolean = sp(c).getBoolean("onboarded", false)
+    fun setOnboarded(c: Context) = sp(c).edit().putBoolean("onboarded", true).apply()
 }

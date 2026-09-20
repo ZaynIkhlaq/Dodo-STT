@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Dodo STT</string>
+    <string name="brand">Dodo</string>
+    <string name="tagline">Speak. It types.</string>
     <string name="subtype_voice">Voice</string>
 
+    <!-- IME panel -->
     <string name="status_idle">Tap to speak</string>
-    <string name="status_listening">Listening %1$s · tap to finish</string>
+    <string name="status_listening">Listening · %1$s</string>
     <string name="status_transcribing">Transcribing…</string>
-    <string name="status_no_key">Add your Groq key in the Dodo STT app</string>
-    <string name="status_no_mic">Allow the microphone in the Dodo STT app</string>
+    <string name="status_no_key">Add your Groq key in the Dodo app</string>
+    <string name="status_no_mic">Allow the microphone in the Dodo app</string>
     <string name="status_too_short">Too short — tap to try again</string>
     <string name="status_silence">Didn\'t hear anything — tap to try again</string>
     <string name="status_mic_busy">Microphone is busy — tap to try again</string>
@@ -17,31 +20,66 @@
     <string name="cd_mic">Start or stop dictation</string>
     <string name="cd_enter">Enter</string>
     <string name="cd_backspace">Backspace</string>
+    <string name="cd_mark">Dodo</string>
 
-    <string name="tagline">Speech to text, powered by Groq.</string>
-    <string name="section_setup">Setup</string>
+    <!-- Onboarding -->
+    <string name="ob_welcome_body">A keyboard with no keys. Open it in any app, speak, and what you said is typed where your cursor is.</string>
+    <string name="ob_start">Get started</string>
+    <string name="ob_continue">Continue</string>
+
+    <string name="ob_mic_title">Let Dodo hear you</string>
+    <string name="ob_mic_body">Dodo records only while the panel says Listening. The clip is deleted from your phone the moment it comes back as text, and it is never sent anywhere but Groq.</string>
+    <string name="ob_mic_action">Allow microphone</string>
+    <string name="ob_mic_settings">Open app settings</string>
+    <string name="ob_mic_granted">Microphone allowed</string>
+
+    <string name="ob_kb_title">Turn Dodo on</string>
+    <string name="ob_kb_body">Dodo lives in your keyboard list, beside Gboard. Android shows the same warning for every third-party keyboard — Dodo has no keys, so it never sees what you type on your normal one.</string>
+    <string name="ob_kb_action">Open keyboard settings</string>
+    <string name="ob_kb_enabled">Dodo is in your keyboard list</string>
+
+    <string name="ob_key_title">Connect Groq</string>
+    <string name="ob_key_body">Dodo transcribes with your own Groq key, so there is no account and no subscription. The free tier covers normal dictation.</string>
+    <string name="ob_key_get">Get a free key</string>
+
+    <string name="ob_done_title">You\'re set</string>
+    <string name="ob_done_body">Tap any text field, then the keyboard-switch icon in the corner of your screen, and pick Dodo. Speak, tap the orb, and your words land in the field.</string>
+    <string name="ob_done_action">Start using Dodo</string>
+    <string name="ob_skip">Skip for now</string>
+
+    <!-- Settings -->
+    <string name="section_setup">Needs attention</string>
+    <string name="section_key">Groq key</string>
+    <string name="section_model">Model</string>
+    <string name="section_language">Language</string>
+    <string name="section_behaviour">Behaviour</string>
+    <string name="section_try">Try it</string>
+
     <string name="step_mic">Microphone</string>
     <string name="step_mic_action">Allow</string>
-    <string name="step_enable">Turn on Dodo STT in keyboards</string>
+    <string name="step_enable">Dodo in your keyboard list</string>
     <string name="step_enable_action">Open</string>
-    <string name="step_done">Done</string>
-    <string name="step_todo">Needed</string>
-    <string name="section_key">Groq API key</string>
+    <string name="step_mic_why">Dodo can\'t record without it</string>
+    <string name="step_enable_why">Dodo won\'t appear in the keyboard switcher</string>
+
     <string name="key_hint">gsk_…</string>
-    <string name="key_test">Test key</string>
+    <string name="key_test">Test</string>
     <string name="key_testing">Testing…</string>
     <string name="key_ok">Key works</string>
     <string name="key_missing">Paste your key first</string>
-    <string name="section_model">Model</string>
-    <string name="model_turbo">Turbo — fastest</string>
-    <string name="model_large">Large v3 — most accurate</string>
-    <string name="section_language">Language</string>
+    <string name="key_saved">Saved on this device, encrypted.</string>
+
+    <string name="model_turbo">Turbo</string>
+    <string name="model_large">Large v3</string>
+    <string name="model_hint">Turbo is fastest. Large v3 is a little more accurate and a little slower.</string>
+
     <string name="language_en">English</string>
-    <string name="language_auto">Detect automatically</string>
-    <string name="section_behaviour">Behaviour</string>
-    <string name="opt_autostart">Start listening as soon as the panel opens</string>
-    <string name="opt_autoreturn">Go back to my keyboard after each dictation</string>
-    <string name="section_try">Try it</string>
-    <string name="try_hint">Tap here, switch to Dodo STT, and talk</string>
+    <string name="language_auto">Automatic</string>
+    <string name="language_hint">English stops accented English being read as another language. Automatic handles anything Whisper supports.</string>
+
+    <string name="opt_autostart">Start listening when the panel opens</string>
+    <string name="opt_autoreturn">Return to my keyboard after each dictation</string>
+
+    <string name="try_hint">Tap here, switch to Dodo, and talk</string>
     <string name="switch_keyboard">Switch keyboard</string>
 </resources>

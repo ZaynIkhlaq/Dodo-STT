@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Refined mono. Surfaces are paper and ink; the accent is rationed to the mic and the one
+     primary action on a screen. If you find yourself reaching for accent a third time, don't. -->
 <resources>
-    <color name="accent">#5B5BD6</color>
-    <color name="accent_recording">#E5484D</color>
-    <color name="panel">#F4F4F7</color>
-    <color name="panel_text">#5F6170</color>
-    <color name="panel_icon">#3C3E4A</color>
+    <color name="bg">#FBFAF8</color>
+    <color name="surface">#F2F0EC</color>
+    <color name="hairline">#E7E4DE</color>
+
+    <color name="text_primary">#111114</color>
+    <color name="text_secondary">#6E6E78</color>
+    <color name="text_tertiary">#9C9AA2</color>
+
+    <color name="accent">#3D5AFE</color>
     <color name="on_accent">#FFFFFF</color>
-    <color name="ok">#2B9A66</color>
-    <color name="warn">#C2410C</color>
+    <color name="rec">#E5484D</color>
+
+    <color name="ok">#1C7D4D</color>
+    <color name="warn">#B4531C</color>
+
+    <!-- The sliding thumb of a segmented control: lifts off the track. -->
+    <color name="thumb">#FFFFFF</color>
+    <color name="switch_thumb_on">#3D5AFE</color>
+    <color name="switch_thumb_off">#FFFFFF</color>
+    <color name="switch_track_on">#663D5AFE</color>
+    <color name="switch_track_off">#DAD6CE</color>
 </resources>

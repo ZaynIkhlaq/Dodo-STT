@@ -2,7 +2,7 @@
 
 Fast, accurate voice typing for Android, powered by [Groq](https://groq.com)'s Whisper.
 
-Dodo STT is a keyboard with no keys. It shows one mic button where your keyboard normally sits.
+Dodo STT is a keyboard with no keys. It shows one mic orb where your keyboard normally sits.
 Speak, tap, and what you said is typed into whatever text field you were in, in any app. It lives in
 the same place as Google or Samsung voice input, so there is no floating bubble over your screen.
 
@@ -16,11 +16,11 @@ the same place as Google or Samsung voice input, so there is no floating bubble 
 1. Download `dodo-stt.apk` from the [latest release](https://github.com/ZaynIkhlaq/Dodo-STT/releases/latest)
    and open it. Android asks you to allow installs from your browser; Play Protect may say the app is
    unknown because it is not on the Play Store.
-2. Open **Dodo STT**. Tap **Allow** for the microphone, then **Open** and switch on Dodo STT in the
-   keyboard list. Android shows a standard warning for every third-party keyboard; see
-   [Privacy](#privacy) for what this one actually does.
-3. Create a free API key at [console.groq.com/keys](https://console.groq.com/keys), paste it in, and
-   tap **Test key**.
+2. Open **Dodo STT**. It walks you through the three things it needs — the microphone, a tick beside
+   Dodo in Android's keyboard list, and a Groq key — one step at a time. Android shows a standard
+   warning for every third-party keyboard; see [Privacy](#privacy) for what this one actually does.
+3. The key step links straight to [console.groq.com/keys](https://console.groq.com/keys). Paste the
+   key in and tap **Test**.
 
 ## Use
 
@@ -28,19 +28,22 @@ the same place as Google or Samsung voice input, so there is no floating bubble 
 2. Tap the keyboard-switch icon in the bottom corner of the screen and pick **Dodo STT**. On Samsung
    phones, turn the icon on under Settings → General management → Keyboard list and default →
    Keyboard button on navigation bar.
-3. Speak. Tap the mic when you are done and the text appears.
+3. Speak. Tap the orb when you are done and the text appears.
 
-The panel also has backspace (hold to repeat), enter, discard, and a button that returns to your
-normal keyboard.
+The orb pulses with your voice while it listens and spins while Groq works. Below it sit backspace
+(hold to repeat), enter, discard, and a button that returns to your normal keyboard.
 
 ## Settings
 
 | Setting | What it does |
 |---|---|
 | Model | **Turbo** is fastest. **Large v3** is slightly more accurate and slightly slower. |
-| Language | **English** avoids accented English being mistaken for another language. **Detect automatically** handles any language Whisper supports. |
-| Start listening as soon as the panel opens | On by default. Turn it off to start each dictation with a tap. |
-| Go back to my keyboard after each dictation | Off by default, so Dodo STT stays ready for the next sentence. |
+| Language | **English** avoids accented English being mistaken for another language. **Automatic** handles any language Whisper supports. |
+| Start listening when the panel opens | On by default. Turn it off to start each dictation with a tap. |
+| Return to my keyboard after each dictation | Off by default, so Dodo STT stays ready for the next sentence. |
+
+Setup steps only appear on this screen while something still needs doing; once the microphone and the
+keyboard list are sorted, that block disappears.
 
 ## Privacy
 
@@ -58,6 +61,8 @@ normal keyboard.
 ## Build
 
 Requires JDK 17 and the Android SDK (API 35). There is no Gradle wrapper in the repo; use Gradle 8.11+.
+The app has no third-party dependencies — not AppCompat, not Material — so every control on screen is
+either a framework widget or a custom `View` in this repo.
 
 ```bash
 gradle :app:assembleDebug

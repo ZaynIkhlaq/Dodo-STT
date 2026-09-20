@@ -3,6 +3,15 @@
     <style name="AppTheme" parent="@android:style/Theme.DeviceDefault.DayNight">
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/bg</item>
         <item name="android:colorAccent">@color/accent</item>
+        <item name="android:colorControlActivated">@color/accent</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:windowLightStatusBar">@bool/light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/light_system_bars</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:textColorHint">@color/text_tertiary</item>
     </style>
 </resources>

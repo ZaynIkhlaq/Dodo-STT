@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Five steps, one at a time, in a single Activity. Only one child of the FrameLayout is visible at
+  a time; OnboardingActivity cross-fades between them. Doing it this way keeps the flow free of a
+  ViewPager, and therefore free of androidx.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:paddingStart="26dp"
+    android:paddingTop="18dp"
+    android:paddingEnd="26dp"
+    android:paddingBottom="22dp">
+
+    <LinearLayout
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:orientation="horizontal">
+
+        <View android:id="@+id/seg_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="5dp" android:background="@drawable/bg_progress" />
+        <View android:id="@+id/seg_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="5dp" android:background="@drawable/bg_progress" />
+        <View android:id="@+id/seg_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="5dp" android:background="@drawable/bg_progress" />
+        <View android:id="@+id/seg_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:layout_marginEnd="5dp" android:background="@drawable/bg_progress" />
+        <View android:id="@+id/seg_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:background="@drawable/bg_progress" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/steps"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- 0 · Welcome -->
+        <LinearLayout
+            android:id="@+id/step_welcome"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:contentDescription="@string/cd_mark"
+                android:src="@drawable/ic_ribbon"
+                android:tint="@color/accent" />
+
+            <TextView
+                style="@style/Display"
+                android:layout_marginTop="26dp"
+                android:text="@string/brand" />
+
+            <TextView
+                style="@style/Body"
+                android:layout_marginTop="12dp"
+                android:text="@string/ob_welcome_body" />
+        </LinearLayout>
+
+        <!-- 1 · Microphone -->
+        <LinearLayout
+            android:id="@+id/step_mic"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView style="@style/Title" android:text="@string/ob_mic_title" />
+            <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_mic_body" />
+
+            <LinearLayout
+                android:id="@+id/mic_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_check"
+                    android:tint="@color/ok" />
+
+                <TextView
+                    style="@style/RowState"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/ob_mic_granted"
+                    android:textColor="@color/ok" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 2 · Keyboard -->
+        <LinearLayout
+            android:id="@+id/step_keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView style="@style/Title" android:text="@string/ob_kb_title" />
+            <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_kb_body" />
+
+            <LinearLayout
+                android:id="@+id/kb_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_check"
+                    android:tint="@color/ok" />
+
+                <TextView
+                    style="@style/RowState"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/ob_kb_enabled"
+                    android:textColor="@color/ok" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 3 · Groq key -->
+        <LinearLayout
+            android:id="@+id/step_key"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView style="@style/Title" android:text="@string/ob_key_title" />
+            <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_key_body" />
+
+            <EditText
+                android:id="@+id/key"
+                style="@style/Field"
+                android:layout_marginTop="22dp"
+                android:hint="@string/key_hint"
+                android:importantForAutofill="no"
+                android:inputType="textPassword|textNoSuggestions"
+                android:singleLine="true" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/key_state"
+                    style="@style/RowState"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+
+                <Button
+                    android:id="@+id/key_test"
+                    style="@style/TextButton"
+                    android:text="@string/key_test" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/key_get"
+                style="@style/TextButton"
+                android:layout_marginStart="-10dp"
+                android:layout_marginTop="6dp"
+                android:drawableEnd="@drawable/ic_external"
+                android:drawablePadding="6dp"
+                android:drawableTint="@color/accent"
+                android:text="@string/ob_key_get" />
+        </LinearLayout>
+
+        <!-- 4 · Done -->
+        <LinearLayout
+            android:id="@+id/step_done"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView style="@style/Title" android:text="@string/ob_done_title" />
+            <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_done_body" />
+
+            <EditText
+                android:id="@+id/try_field"
+                style="@style/Field"
+                android:layout_marginTop="22dp"
+                android:gravity="top"
+                android:hint="@string/try_hint"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3" />
+
+            <Button
+                android:id="@+id/switch_keyboard"
+                style="@style/TextButton"
+                android:layout_marginStart="-10dp"
+                android:layout_marginTop="4dp"
+                android:text="@string/switch_keyboard" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/action_secondary"
+        style="@style/TextButton"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="6dp"
+        android:text="@string/ob_skip"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/action_primary"
+        style="@style/PrimaryButton"
+        android:text="@string/ob_start" />
+</LinearLayout>

@@ -1,8 +1,7 @@
 package com.zaynikhlaq.dodostt
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.Looper
@@ -209,9 +208,9 @@ class DodoIme : InputMethodService() {
 
     // --- state -----------------------------------------------------------------------------------
 
-    private fun hasMic() = checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+    private fun hasMic() = Setup.hasMic(this)
 
-    private fun isReady() = hasMic() && Prefs.apiKey(this).isNotEmpty()
+    private fun isReady() = hasMic() && Setup.hasKey(this)
 
     private fun openSettings() {
         startActivity(Intent(this, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -223,12 +222,14 @@ class DodoIme : InputMethodService() {
             State.RECORDING -> MicButtonView.Mode.RECORDING
             State.TRANSCRIBING -> MicButtonView.Mode.BUSY
         }
-        cancel?.visibility = if (state == State.RECORDING) View.VISIBLE else View.INVISIBLE
+        val live = state == State.RECORDING
+        cancel?.visibility = if (live) View.VISIBLE else View.INVISIBLE
+        cancel?.imageTintList = ColorStateList.valueOf(getColor(if (live) R.color.rec else R.color.text_secondary))
         status?.text = message ?: when {
             state == State.TRANSCRIBING -> getString(R.string.status_transcribing)
             state == State.RECORDING -> getString(R.string.status_listening, "0:00")
             !hasMic() -> getString(R.string.status_no_mic)
-            Prefs.apiKey(this).isEmpty() -> getString(R.string.status_no_key)
+            !Setup.hasKey(this) -> getString(R.string.status_no_key)
             else -> getString(R.string.status_idle)
         }
     }
