@@ -7,7 +7,6 @@ import android.os.Handler
 import android.os.Looper
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
-import android.view.MotionEvent
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
@@ -30,6 +29,7 @@ class DodoIme : InputMethodService() {
     private var status: TextView? = null
     private var mic: MicButtonView? = null
     private var cancel: ImageButton? = null
+    private var keyboard: KeyboardView? = null
 
     private val meter = object : Runnable {
         override fun run() {
@@ -59,8 +59,16 @@ class DodoIme : InputMethodService() {
         cancel?.setOnClickListener { discard() }
         status?.setOnClickListener { if (!isReady()) openSettings() }
         view.findViewById<ImageButton>(R.id.btn_keyboard).setOnClickListener { backToKeyboard() }
-        view.findViewById<ImageButton>(R.id.btn_enter).setOnClickListener { pressEnter() }
-        bindBackspace(view.findViewById(R.id.btn_backspace))
+
+        keyboard = view.findViewById(R.id.keyboard)
+        keyboard?.listener = object : KeyboardView.Listener {
+            override fun onText(text: String) {
+                currentInputConnection?.commitText(text, 1)
+            }
+
+            override fun onBackspace() = backspace()
+            override fun onEnter() = pressEnter()
+        }
         render()
         return view
     }
@@ -69,6 +77,8 @@ class DodoIme : InputMethodService() {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
+        // A new field starts lower-case and on the letters layer, whatever the last one ended on.
+        if (!restarting) keyboard?.reset()
         render()
         if (!restarting && state == State.IDLE && isReady() && Prefs.autoStart(this)) startRecording()
     }
@@ -173,31 +183,6 @@ class DodoIme : InputMethodService() {
     private fun backspace() {
         val ic = currentInputConnection ?: return
         if (!ic.getSelectedText(0).isNullOrEmpty()) ic.commitText("", 1) else sendDownUpKeyEvents(KeyEvent.KEYCODE_DEL)
-    }
-
-    /** Tap deletes one character; holding repeats, like a normal keyboard. */
-    private fun bindBackspace(button: ImageButton) {
-        val repeat = object : Runnable {
-            override fun run() {
-                backspace()
-                handler.postDelayed(this, 45)
-            }
-        }
-        button.setOnTouchListener { v, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    v.isPressed = true
-                    v.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-                    backspace()
-                    handler.postDelayed(repeat, 380)
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    v.isPressed = false
-                    handler.removeCallbacks(repeat)
-                }
-            }
-            true
-        }
     }
 
     private fun backToKeyboard() {

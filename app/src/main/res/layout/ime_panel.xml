@@ -1,24 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  One orb, a caption, and a hairline shelf of utility keys. The orb is optically centred: the
-  discard button on the left is balanced by an equal-width Space on the right, so nothing shifts
-  when discard appears and disappears mid-dictation.
+  A voice bar over a keyboard. The orb keeps all three of its states at 56 dp; the keys below mean
+  a typo no longer costs a trip through the keyboard switcher.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/bg"
     android:orientation="vertical"
-    android:paddingStart="14dp"
-    android:paddingTop="18dp"
-    android:paddingEnd="14dp"
-    android:paddingBottom="8dp">
+    android:paddingStart="6dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="6dp"
+    android:paddingBottom="6dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_height="64dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="4dp">
+
+        <com.zaynikhlaq.dodostt.MicButtonView
+            android:id="@+id/mic"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:contentDescription="@string/cd_mic" />
+
+        <TextView
+            android:id="@+id/status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif"
+            android:letterSpacing="-0.01"
+            android:maxLines="2"
+            android:text="@string/status_idle"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp" />
 
         <ImageButton
             android:id="@+id/btn_cancel"
@@ -27,66 +47,21 @@
             android:src="@drawable/ic_close"
             android:visibility="invisible" />
 
-        <com.zaynikhlaq.dodostt.MicButtonView
-            android:id="@+id/mic"
-            android:layout_width="104dp"
-            android:layout_height="104dp"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:contentDescription="@string/cd_mic" />
-
-        <Space
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:ellipsize="end"
-        android:fontFamily="sans-serif"
-        android:gravity="center"
-        android:letterSpacing="-0.01"
-        android:maxLines="2"
-        android:text="@string/status_idle"
-        android:textColor="@color/text_secondary"
-        android:textSize="14sp" />
-
-    <View
-        style="@style/Hairline"
-        android:layout_marginTop="16dp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
         <ImageButton
             android:id="@+id/btn_keyboard"
             style="@style/PanelKey"
             android:contentDescription="@string/cd_keyboard"
             android:src="@drawable/ic_keyboard" />
-
-        <Space
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <ImageButton
-            android:id="@+id/btn_backspace"
-            style="@style/PanelKey"
-            android:contentDescription="@string/cd_backspace"
-            android:src="@drawable/ic_backspace" />
-
-        <ImageButton
-            android:id="@+id/btn_enter"
-            style="@style/PanelKey"
-            android:layout_marginStart="6dp"
-            android:contentDescription="@string/cd_enter"
-            android:src="@drawable/ic_enter" />
     </LinearLayout>
+
+    <View
+        style="@style/Hairline"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp" />
+
+    <com.zaynikhlaq.dodostt.KeyboardView
+        android:id="@+id/keyboard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="6dp" />
 </LinearLayout>

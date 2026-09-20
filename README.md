@@ -2,12 +2,14 @@
 
 Fast, accurate voice typing for Android, powered by [Groq](https://groq.com)'s Whisper.
 
-Dodo STT is a keyboard with no keys. It shows one mic orb where your keyboard normally sits.
-Speak, tap, and what you said is typed into whatever text field you were in, in any app. It lives in
-the same place as Google or Samsung voice input, so there is no floating bubble over your screen.
+Dodo STT is a keyboard that listens first. A mic orb sits above a normal QWERTY layout: speak and
+tap, and what you said is typed into whatever text field you were in, in any app — then fix a typo
+with the keys right below, without switching keyboards. It lives in the same place as Google or
+Samsung voice input, so there is no floating bubble over your screen.
 
 - **Accurate.** Uses Whisper large v3 (turbo by default), not the phone's built-in recognizer.
 - **Fast.** Groq returns a transcript in about a second.
+- **Complete.** Voice and keys in one panel, so editing never means switching keyboards.
 - **Simple.** One panel, one settings screen. No account, no subscription.
 - **Yours.** You bring your own Groq API key. Groq's free tier covers normal dictation.
 
@@ -30,8 +32,9 @@ the same place as Google or Samsung voice input, so there is no floating bubble 
    Keyboard button on navigation bar.
 3. Speak. Tap the orb when you are done and the text appears.
 
-The orb pulses with your voice while it listens and spins while Groq works. Below it sit backspace
-(hold to repeat), enter, discard, and a button that returns to your normal keyboard.
+The orb pulses with your voice while it listens and spins while Groq works. Beside it sit discard
+and a button that returns to your previous keyboard; below it is a full QWERTY layout with shift
+(double-tap to lock), a `?123` symbol layer, and backspace that repeats when held.
 
 ## Settings
 

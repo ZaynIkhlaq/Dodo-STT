@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Caps lock: the same chevron, filled, over a bar. -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M12,4.0 L20.2,12.4 H15.8 V17.2 H8.2 V12.4 H3.8 Z" />
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M8.2,19.0 H15.8 V21.2 H8.2 Z" />
+</vector>

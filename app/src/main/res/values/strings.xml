@@ -18,9 +18,8 @@
     <string name="cd_keyboard">Back to keyboard</string>
     <string name="cd_cancel">Discard recording</string>
     <string name="cd_mic">Start or stop dictation</string>
-    <string name="cd_enter">Enter</string>
-    <string name="cd_backspace">Backspace</string>
     <string name="cd_mark">Dodo</string>
+    <string name="cd_keys">Keyboard</string>
 
     <!-- Onboarding -->
     <string name="ob_welcome_body">A keyboard with no keys. Open it in any app, speak, and what you said is typed where your cursor is.</string>
