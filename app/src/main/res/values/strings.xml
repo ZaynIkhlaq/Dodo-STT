@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dodo STT</string>
+    <string name="subtype_voice">Voice</string>
+
+    <string name="status_idle">Tap to speak</string>
+    <string name="status_listening">Listening %1$s · tap to finish</string>
+    <string name="status_transcribing">Transcribing…</string>
+    <string name="status_no_key">Add your Groq key in the Dodo STT app</string>
+    <string name="status_no_mic">Allow the microphone in the Dodo STT app</string>
+    <string name="status_too_short">Too short — tap to try again</string>
+    <string name="status_silence">Didn\'t hear anything — tap to try again</string>
+    <string name="status_mic_busy">Microphone is busy — tap to try again</string>
+
+    <string name="cd_keyboard">Back to keyboard</string>
+    <string name="cd_cancel">Discard recording</string>
+    <string name="cd_mic">Start or stop dictation</string>
+    <string name="cd_enter">Enter</string>
+    <string name="cd_backspace">Backspace</string>
+
+    <string name="tagline">Speech to text, powered by Groq.</string>
+    <string name="section_setup">Setup</string>
+    <string name="step_mic">Microphone</string>
+    <string name="step_mic_action">Allow</string>
+    <string name="step_enable">Turn on Dodo STT in keyboards</string>
+    <string name="step_enable_action">Open</string>
+    <string name="step_done">Done</string>
+    <string name="step_todo">Needed</string>
+    <string name="section_key">Groq API key</string>
+    <string name="key_hint">gsk_…</string>
+    <string name="key_test">Test key</string>
+    <string name="key_testing">Testing…</string>
+    <string name="key_ok">Key works</string>
+    <string name="key_missing">Paste your key first</string>
+    <string name="section_model">Model</string>
+    <string name="model_turbo">Turbo — fastest</string>
+    <string name="model_large">Large v3 — most accurate</string>
+    <string name="section_language">Language</string>
+    <string name="language_en">English</string>
+    <string name="language_auto">Detect automatically</string>
+    <string name="section_behaviour">Behaviour</string>
+    <string name="opt_autostart">Start listening as soon as the panel opens</string>
+    <string name="opt_autoreturn">Go back to my keyboard after each dictation</string>
+    <string name="section_try">Try it</string>
+    <string name="try_hint">Tap here, switch to Dodo STT, and talk</string>
+    <string name="switch_keyboard">Switch keyboard</string>
+</resources>

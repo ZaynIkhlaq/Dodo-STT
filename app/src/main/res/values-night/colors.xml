@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent">#7C7CF0</color>
+    <color name="accent_recording">#F2555A</color>
+    <color name="panel">#141519</color>
+    <color name="panel_text">#A4A6B3</color>
+    <color name="panel_icon">#D5D6DE</color>
+    <color name="ok">#3DD68C</color>
+    <color name="warn">#FF9B62</color>
+</resources>

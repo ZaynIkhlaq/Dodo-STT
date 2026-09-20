@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="22dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="22dp"
+        android:paddingBottom="40dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="30sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/tagline"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="15sp" />
+
+        <!-- Setup -->
+        <TextView style="@style/SectionLabel" android:text="@string/section_setup" />
+
+        <LinearLayout style="@style/Card">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/RowTitle" android:text="@string/step_mic" />
+                    <TextView android:id="@+id/mic_state" style="@style/RowState" />
+                </LinearLayout>
+                <Button
+                    android:id="@+id/mic_action"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/step_mic_action"
+                    android:textColor="@color/accent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/RowTitle" android:text="@string/step_enable" />
+                    <TextView android:id="@+id/ime_state" style="@style/RowState" />
+                </LinearLayout>
+                <Button
+                    android:id="@+id/ime_action"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/step_enable_action"
+                    android:textColor="@color/accent" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Key -->
+        <TextView style="@style/SectionLabel" android:text="@string/section_key" />
+
+        <LinearLayout style="@style/Card">
+            <EditText
+                android:id="@+id/key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/key_hint"
+                android:importantForAutofill="no"
+                android:inputType="textPassword|textNoSuggestions"
+                android:singleLine="true"
+                android:textSize="16sp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/key_state"
+                    style="@style/RowState"
+                    android:layout_width="0dp"
+                    android:layout_weight="1" />
+                <Button
+                    android:id="@+id/key_test"
+                    style="?android:attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/key_test"
+                    android:textColor="@color/accent" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Model -->
+        <TextView style="@style/SectionLabel" android:text="@string/section_model" />
+        <RadioGroup android:id="@+id/model_group" style="@style/Card">
+            <RadioButton android:id="@+id/model_turbo" style="@style/Choice" android:text="@string/model_turbo" />
+            <RadioButton android:id="@+id/model_large" style="@style/Choice" android:text="@string/model_large" />
+        </RadioGroup>
+
+        <!-- Language -->
+        <TextView style="@style/SectionLabel" android:text="@string/section_language" />
+        <RadioGroup android:id="@+id/language_group" style="@style/Card">
+            <RadioButton android:id="@+id/language_en" style="@style/Choice" android:text="@string/language_en" />
+            <RadioButton android:id="@+id/language_auto" style="@style/Choice" android:text="@string/language_auto" />
+        </RadioGroup>
+
+        <!-- Behaviour -->
+        <TextView style="@style/SectionLabel" android:text="@string/section_behaviour" />
+        <LinearLayout style="@style/Card">
+            <Switch android:id="@+id/opt_autostart" style="@style/Choice" android:text="@string/opt_autostart" />
+            <Switch android:id="@+id/opt_autoreturn" style="@style/Choice" android:layout_marginTop="4dp" android:text="@string/opt_autoreturn" />
+        </LinearLayout>
+
+        <!-- Try -->
+        <TextView style="@style/SectionLabel" android:text="@string/section_try" />
+        <LinearLayout style="@style/Card">
+            <EditText
+                android:id="@+id/try_field"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:hint="@string/try_hint"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="3"
+                android:textSize="16sp" />
+            <Button
+                android:id="@+id/switch_keyboard"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="@string/switch_keyboard"
+                android:textColor="@color/accent" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
