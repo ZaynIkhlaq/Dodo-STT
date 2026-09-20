@@ -59,7 +59,7 @@ class DodoIme : InputMethodService() {
     private var pendingInsert: String? = null
 
     private var status: TextView? = null
-    private var mic: MicButtonView? = null
+    private var pill: StartPillView? = null
     private var cancel: ImageButton? = null
     private var keyboard: KeyboardView? = null
 
@@ -67,7 +67,7 @@ class DodoIme : InputMethodService() {
         override fun run() {
             if (state != State.RECORDING) return
             if (!recorder.isRecording) return finishRecording()
-            mic?.setLevel(recorder.level())
+            pill?.setLevel(recorder.level())
             renderTimer()
             considerCut()
             handler.postDelayed(this, 60)
@@ -82,10 +82,10 @@ class DodoIme : InputMethodService() {
     override fun onCreateInputView(): View {
         val view = layoutInflater.inflate(R.layout.ime_panel, null)
         status = view.findViewById(R.id.status)
-        mic = view.findViewById(R.id.mic)
+        pill = view.findViewById(R.id.pill)
         cancel = view.findViewById(R.id.btn_cancel)
 
-        mic?.setOnClickListener {
+        pill?.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             onMicTapped()
         }
@@ -96,7 +96,11 @@ class DodoIme : InputMethodService() {
                 !isReady() -> openSettings()
             }
         }
-        view.findViewById<ImageButton>(R.id.btn_keyboard).setOnClickListener { backToKeyboard() }
+        // Tap for Dodo's own settings; hold to hand back to whichever keyboard you came from.
+        view.findViewById<ImageButton>(R.id.btn_menu).apply {
+            setOnClickListener { openSettings() }
+            setOnLongClickListener { backToKeyboard(); true }
+        }
 
         keyboard = view.findViewById(R.id.keyboard)
         keyboard?.listener = object : KeyboardView.Listener {
@@ -317,14 +321,14 @@ class DodoIme : InputMethodService() {
     }
 
     private fun render(message: String? = null) {
-        mic?.mode = when (state) {
-            State.IDLE -> MicButtonView.Mode.IDLE
-            State.RECORDING -> MicButtonView.Mode.RECORDING
-            State.TRANSCRIBING -> MicButtonView.Mode.BUSY
+        pill?.mode = when (state) {
+            State.IDLE -> StartPillView.Mode.IDLE
+            State.RECORDING -> StartPillView.Mode.RECORDING
+            State.TRANSCRIBING -> StartPillView.Mode.BUSY
         }
         val live = state == State.RECORDING
         cancel?.visibility = if (live) View.VISIBLE else View.INVISIBLE
-        cancel?.imageTintList = ColorStateList.valueOf(getColor(if (live) R.color.rec else R.color.text_secondary))
+        cancel?.imageTintList = ColorStateList.valueOf(getColor(if (live) R.color.rec else R.color.kb_muted))
 
         val pending = pendingInsert
         status?.text = message ?: when {

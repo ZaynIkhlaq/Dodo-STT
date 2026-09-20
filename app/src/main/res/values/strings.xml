@@ -6,24 +6,28 @@
     <string name="subtype_voice">Voice</string>
 
     <!-- IME panel -->
-    <string name="status_idle">Tap to speak</string>
+    <string name="status_idle"></string>
     <string name="status_listening">Listening · %1$s</string>
-    <string name="status_transcribing">Transcribing…</string>
-    <string name="status_no_key">Add your Groq key in the Dodo app</string>
-    <string name="status_no_mic">Allow the microphone in the Dodo app</string>
-    <string name="status_silence">Didn\'t hear anything — tap to try again</string>
-    <string name="status_mic_busy">Microphone is busy — tap to try again</string>
-    <string name="status_pending">Tap to insert what you said (%1$d words)</string>
+    <string name="status_transcribing"></string>
+    <string name="status_no_key">Add your Groq key — open Dodo</string>
+    <string name="status_no_mic">We can\'t hear you — open Dodo</string>
+    <string name="status_silence">We didn\'t catch that</string>
+    <string name="status_mic_busy">Another app is using the microphone</string>
+    <string name="status_pending">Tap to insert %1$d words</string>
 
     <string name="channel_dictation">Dictation</string>
     <string name="notif_listening">Dodo is listening</string>
     <string name="notif_listening_body">Speech is still being transcribed with the screen off.</string>
 
-    <string name="cd_keyboard">Back to keyboard</string>
     <string name="cd_cancel">Discard recording</string>
     <string name="cd_mic">Start or stop dictation</string>
     <string name="cd_mark">Dodo</string>
     <string name="cd_keys">Keyboard</string>
+    <string name="cd_menu">Dodo settings</string>
+
+    <string name="pill_start">Start</string>
+    <string name="pill_stop">Stop</string>
+    <string name="pill_busy">Typing</string>
 
     <!-- Onboarding -->
     <string name="ob_welcome_body">A keyboard with no keys. Open it in any app, speak, and what you said is typed where your cursor is.</string>

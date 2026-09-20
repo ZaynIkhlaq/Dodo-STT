@@ -23,4 +23,14 @@
     <color name="switch_thumb_off">#FFFFFF</color>
     <color name="switch_track_on">#663D5AFE</color>
     <color name="switch_track_off">#DAD6CE</color>
+
+    <!-- Keyboard surface, sampled from the Wispr Flow reference screenshot. The keyboard is the
+         platform's shape, not the app's: character keys sit lighter than the deck, modifiers darker. -->
+    <color name="kb_bg">#D1D3D9</color>
+    <color name="kb_key">#FFFFFF</color>
+    <color name="kb_mod">#ADB1BA</color>
+    <color name="kb_label">#000000</color>
+    <color name="kb_pill">#111114</color>
+    <color name="kb_on_pill">#FFFFFF</color>
+    <color name="kb_muted">#5A5E68</color>
 </resources>

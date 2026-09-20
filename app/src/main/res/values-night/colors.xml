@@ -20,4 +20,12 @@
     <color name="switch_thumb_off">#7A7A84</color>
     <color name="switch_track_on">#666B85FF</color>
     <color name="switch_track_off">#3A3A42</color>
+
+    <color name="kb_bg">#2B2B2B</color>
+    <color name="kb_key">#6F7072</color>
+    <color name="kb_mod">#484848</color>
+    <color name="kb_label">#FFFFFF</color>
+    <color name="kb_pill">#FFFFFF</color>
+    <color name="kb_on_pill">#000000</color>
+    <color name="kb_muted">#9A9A9C</color>
 </resources>
