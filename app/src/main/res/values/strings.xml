@@ -11,9 +11,13 @@
     <string name="status_transcribing">Transcribing…</string>
     <string name="status_no_key">Add your Groq key in the Dodo app</string>
     <string name="status_no_mic">Allow the microphone in the Dodo app</string>
-    <string name="status_too_short">Too short — tap to try again</string>
     <string name="status_silence">Didn\'t hear anything — tap to try again</string>
     <string name="status_mic_busy">Microphone is busy — tap to try again</string>
+    <string name="status_pending">Tap to insert what you said (%1$d words)</string>
+
+    <string name="channel_dictation">Dictation</string>
+    <string name="notif_listening">Dodo is listening</string>
+    <string name="notif_listening_body">Speech is still being transcribed with the screen off.</string>
 
     <string name="cd_keyboard">Back to keyboard</string>
     <string name="cd_cancel">Discard recording</string>

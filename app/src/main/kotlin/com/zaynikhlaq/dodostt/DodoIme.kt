@@ -1,10 +1,13 @@
 package com.zaynikhlaq.dodostt
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.View
@@ -14,17 +17,46 @@ import android.widget.ImageButton
 import android.widget.TextView
 
 /**
- * A voice-only input method: instead of keys it shows one mic. Speak, tap, and the Groq transcript is
- * typed into whatever text field is focused.
+ * A voice-first input method: a mic over a keyboard. Speech is cut into segments at pauses and each
+ * one is transcribed while the next is still being spoken, so text lands in the field a few seconds
+ * behind the voice instead of all at once at the end.
  */
 class DodoIme : InputMethodService() {
     private enum class State { IDLE, RECORDING, TRANSCRIBING }
 
+    private companion object {
+        /** A segment has to be worth sending before a pause can end it. */
+        const val MIN_SEGMENT_MS = 1200L
+        /** Silence this long ends a segment. Roughly the gap between sentences. */
+        const val PAUSE_MS = 700L
+        /** Someone talking without pausing still gets text; this bounds how far behind it runs. */
+        const val MAX_SEGMENT_MS = 18_000L
+        /** With no field on screen, this much silence means the phone was put down. */
+        const val ABANDONED_MS = 30_000L
+    }
+
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var recorder: Recorder
     private var state = State.IDLE
-    /** Bumped whenever a recording is abandoned so a late transcript can't be typed into the wrong place. */
+
+    /** Bumped whenever a session is abandoned, so late transcripts can't be typed into the wrong place. */
     private var generation = 0
+    private var sessionStartedAt = 0L
+
+    // --- the segment pipeline ---
+    private var nextSeq = 0
+    private var nextToCommit = 0
+    private val ready = HashMap<Int, String>()
+    private val awaiting = HashSet<Int>()
+    private var delivered = 0
+    private var errorMessage: String? = null
+
+    /** False while no input view is attached — during a screen-off, say. */
+    private var attached = false
+    /** Text transcribed while there was nowhere to put it. */
+    private val stranded = StringBuilder()
+    /** Stranded text waiting for the user to say where it goes. */
+    private var pendingInsert: String? = null
 
     private var status: TextView? = null
     private var mic: MicButtonView? = null
@@ -34,9 +66,10 @@ class DodoIme : InputMethodService() {
     private val meter = object : Runnable {
         override fun run() {
             if (state != State.RECORDING) return
+            if (!recorder.isRecording) return finishRecording()
             mic?.setLevel(recorder.level())
-            val seconds = recorder.elapsedMs / 1000
-            status?.text = getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
+            renderTimer()
+            considerCut()
             handler.postDelayed(this, 60)
         }
     }
@@ -57,7 +90,12 @@ class DodoIme : InputMethodService() {
             onMicTapped()
         }
         cancel?.setOnClickListener { discard() }
-        status?.setOnClickListener { if (!isReady()) openSettings() }
+        status?.setOnClickListener {
+            when {
+                pendingInsert != null -> insertStranded()
+                !isReady() -> openSettings()
+            }
+        }
         view.findViewById<ImageButton>(R.id.btn_keyboard).setOnClickListener { backToKeyboard() }
 
         keyboard = view.findViewById(R.id.keyboard)
@@ -77,21 +115,25 @@ class DodoIme : InputMethodService() {
 
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
-        // A new field starts lower-case and on the letters layer, whatever the last one ended on.
+        attached = true
         if (!restarting) keyboard?.reset()
         render()
-        if (!restarting && state == State.IDLE && isReady() && Prefs.autoStart(this)) startRecording()
+        val idle = state == State.IDLE && pendingInsert == null
+        if (!restarting && idle && isReady() && Prefs.autoStart(this)) startRecording()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
         super.onFinishInputView(finishingInput)
-        if (state == State.RECORDING) discard()
+        attached = false
+        // Recording deliberately carries on. A screen timeout in the middle of a long dictation used
+        // to throw all of it away; MicService keeps the microphone open until there is a real pause.
     }
 
     override fun onDestroy() {
         generation++
         handler.removeCallbacksAndMessages(null)
         recorder.cancel()
+        MicService.stop(this)
         super.onDestroy()
     }
 
@@ -109,58 +151,126 @@ class DodoIme : InputMethodService() {
         try {
             recorder.start()
         } catch (e: Exception) {
-            render(getString(R.string.status_mic_busy))
-            return
+            return render(getString(R.string.status_mic_busy))
         }
+        generation++
+        nextSeq = 0
+        nextToCommit = 0
+        delivered = 0
+        ready.clear()
+        awaiting.clear()
+        stranded.setLength(0)
+        errorMessage = null
+        sessionStartedAt = SystemClock.elapsedRealtime()
+        MicService.start(this)
         state = State.RECORDING
         render()
         handler.post(meter)
     }
 
+    /** Ends a segment at a pause, or when one has run long enough to be worth sending regardless. */
+    private fun considerCut() {
+        val atPause = recorder.segmentMs >= MIN_SEGMENT_MS && recorder.hasSpeech && recorder.silentMs >= PAUSE_MS
+        if (atPause || recorder.segmentMs >= MAX_SEGMENT_MS) send(recorder.cut())
+        if (!attached && recorder.silentMs >= ABANDONED_MS) finishRecording()
+    }
+
     private fun finishRecording() {
         handler.removeCallbacks(meter)
-        val length = recorder.stop()
-        state = State.IDLE
-        // Whisper invents text ("Thank you.") for silent audio, so don't send it.
-        val rejected = when {
-            length < 400 -> R.string.status_too_short
-            recorder.peak < 700 -> R.string.status_silence
-            else -> null
-        }
-        if (rejected != null) {
-            recorder.file.delete()
-            return render(getString(rejected))
-        }
-
+        send(recorder.finish())
+        MicService.stop(this)
         state = State.TRANSCRIBING
         render()
-        val ticket = ++generation
-        GroqClient.transcribe(Prefs.apiKey(this), Prefs.model(this), Prefs.language(this), recorder.file) { result ->
-            recorder.file.delete()
+        // Nothing outstanding means this drops straight back to idle.
+        flush()
+    }
+
+    private fun send(segment: Segment?) {
+        val seg = segment ?: return
+        val seq = nextSeq++
+        val ticket = generation
+        awaiting.add(seq)
+        GroqClient.transcribe(Prefs.apiKey(this), Prefs.model(this), Prefs.language(this), seg.file) { result ->
+            seg.file.delete()
             if (ticket != generation) return@transcribe
-            state = State.IDLE
+            awaiting.remove(seq)
+            // An error still has to take its turn in the queue, or everything behind it stalls.
             when (result) {
-                is GroqClient.Result.Ok -> {
-                    render()
-                    if (result.text.isNotEmpty()) {
-                        type(result.text)
-                        if (Prefs.autoReturn(this)) handler.postDelayed({ backToKeyboard() }, 120)
-                    }
+                is GroqClient.Result.Ok -> ready[seq] = result.text
+                is GroqClient.Result.Err -> {
+                    errorMessage = result.message
+                    ready[seq] = ""
                 }
-                is GroqClient.Result.Err -> render(result.message)
             }
+            flush()
+            render()
         }
+    }
+
+    /** Commits whatever is now contiguous from the front of the queue, so text never lands out of order. */
+    private fun flush() {
+        while (ready.containsKey(nextToCommit)) {
+            val text = ready.remove(nextToCommit)!!
+            nextToCommit++
+            if (text.isNotEmpty()) deliver(text)
+        }
+        if (state == State.TRANSCRIBING && awaiting.isEmpty() && ready.isEmpty()) endSession()
+    }
+
+    private fun deliver(text: String) {
+        delivered++
+        if (attached && currentInputConnection != null) {
+            type(text)
+        } else {
+            if (stranded.isNotEmpty()) stranded.append(' ')
+            stranded.append(text)
+        }
+    }
+
+    private fun endSession() {
+        state = State.IDLE
+        if (stranded.isNotEmpty()) {
+            // Don't guess which field this belongs in — the user may have unlocked into another app.
+            // Offer it, and put it on the clipboard so it survives even if they never take the offer.
+            val text = stranded.toString()
+            stranded.setLength(0)
+            pendingInsert = text
+            copyToClipboard(text)
+        } else if (delivered > 0 && Prefs.autoReturn(this)) {
+            handler.postDelayed({ backToKeyboard() }, 120)
+        }
+        render(if (delivered == 0 && errorMessage == null) getString(R.string.status_silence) else null)
     }
 
     private fun discard() {
         generation++
         handler.removeCallbacks(meter)
         recorder.cancel()
+        MicService.stop(this)
+        ready.clear()
+        awaiting.clear()
+        stranded.setLength(0)
+        nextSeq = 0
+        nextToCommit = 0
         state = State.IDLE
         render()
     }
 
-    /** Inserts the transcript, adding a leading space when it would otherwise run into the previous word. */
+    private fun insertStranded() {
+        val text = pendingInsert ?: return
+        pendingInsert = null
+        type(text)
+        render()
+    }
+
+    private fun copyToClipboard(text: String) {
+        runCatching {
+            getSystemService(ClipboardManager::class.java)
+                .setPrimaryClip(ClipData.newPlainText(getString(R.string.app_name), text))
+        }
+    }
+
+    /** Inserts text, adding a leading space when it would otherwise run into the previous word. */
     private fun type(text: String) {
         val ic = currentInputConnection ?: return
         val before = ic.getTextBeforeCursor(1, 0)
@@ -201,6 +311,11 @@ class DodoIme : InputMethodService() {
         startActivity(Intent(this, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
+    private fun renderTimer() {
+        val seconds = (SystemClock.elapsedRealtime() - sessionStartedAt) / 1000
+        status?.text = getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
+    }
+
     private fun render(message: String? = null) {
         mic?.mode = when (state) {
             State.IDLE -> MicButtonView.Mode.IDLE
@@ -210,9 +325,13 @@ class DodoIme : InputMethodService() {
         val live = state == State.RECORDING
         cancel?.visibility = if (live) View.VISIBLE else View.INVISIBLE
         cancel?.imageTintList = ColorStateList.valueOf(getColor(if (live) R.color.rec else R.color.text_secondary))
+
+        val pending = pendingInsert
         status?.text = message ?: when {
+            pending != null -> getString(R.string.status_pending, pending.split(' ').size)
             state == State.TRANSCRIBING -> getString(R.string.status_transcribing)
             state == State.RECORDING -> getString(R.string.status_listening, "0:00")
+            errorMessage != null -> errorMessage
             !hasMic() -> getString(R.string.status_no_mic)
             !Setup.hasKey(this) -> getString(R.string.status_no_key)
             else -> getString(R.string.status_idle)

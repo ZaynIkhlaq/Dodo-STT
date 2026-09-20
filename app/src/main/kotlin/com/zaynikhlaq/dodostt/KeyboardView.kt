@@ -39,6 +39,8 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
         val label: String,
         val kind: Kind = Kind.CHAR,
         val weight: Float = 1f,
+        /** Typed on a long press, and shown small above the letter. */
+        val secondary: String? = null,
     ) {
         val bounds = RectF()
     }
@@ -46,15 +48,16 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
     var listener: Listener? = null
 
     private val density = resources.displayMetrics.density
-    private val rowHeight = 46f * density
+    private val rowHeight = 52f * density
     private val gapX = 3f * density
     private val gapY = 5f * density
-    private val radius = 8f * density
+    private val radius = 10f * density
 
     private val surface = context.getColor(R.color.surface)
     private val hairline = context.getColor(R.color.hairline)
     private val colorPrimary = context.getColor(R.color.text_primary)
     private val colorSecondary = context.getColor(R.color.text_secondary)
+    private val colorTertiary = context.getColor(R.color.text_tertiary)
     private val accent = context.getColor(R.color.accent)
 
     private val keyFill = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -74,10 +77,11 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private var shift = Shift.OFF
     private var lastShiftTap = 0L
     private var pressed: Key? = null
+    private var longPressed = false
 
     // Row 1 is inset by half a key so the letters nest the way a physical keyboard does.
     private val letterRows: List<List<Key>> by lazy { listOf(
-        "qwertyuiop".map { Key(it.toString()) },
+        "qwertyuiop".mapIndexed { i, c -> Key(c.toString(), secondary = "1234567890"[i].toString()) },
         "asdfghjkl".map { Key(it.toString()) },
         listOf(Key("shift", Kind.SHIFT, 1.5f)) + "zxcvbnm".map { Key(it.toString()) } +
             listOf(Key("del", Kind.BACKSPACE, 1.5f)),
@@ -146,6 +150,17 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     // --- input -----------------------------------------------------------------------------------
 
+    /** Holding a top-row key types the number printed above it. */
+    private val longPress = Runnable {
+        val alt = pressed?.secondary?.takeUnless { symbols }
+        if (alt != null) {
+            performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            listener?.onText(alt)
+            longPressed = true
+            press(null)
+        }
+    }
+
     private val repeatBackspace = object : Runnable {
         override fun run() {
             listener?.onBackspace()
@@ -156,9 +171,11 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun onTouchEvent(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                longPressed = false
                 press(keyAt(event.x, event.y))
                 pressed?.let { key ->
                     performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                    if (key.secondary != null && !symbols) handler.postDelayed(longPress, 320)
                     // Backspace fires immediately and repeats; everything else waits for the lift,
                     // so a finger that lands wrong can still slide to the right key.
                     if (key.kind == Kind.BACKSPACE) {
@@ -171,16 +188,18 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
                 val over = keyAt(event.x, event.y)
                 if (over !== pressed) {
                     handler.removeCallbacks(repeatBackspace)
+                    handler.removeCallbacks(longPress)
                     press(if (pressed?.kind == Kind.BACKSPACE) null else over)
                 }
             }
             MotionEvent.ACTION_UP -> {
                 handler.removeCallbacks(repeatBackspace)
-                pressed?.let { if (it.kind != Kind.BACKSPACE) emit(it) }
+                handler.removeCallbacks(longPress)
+                pressed?.let { if (it.kind != Kind.BACKSPACE && !longPressed) emit(it) }
                 press(null)
             }
             MotionEvent.ACTION_CANCEL -> {
-                handler.removeCallbacks(repeatBackspace)
+                handler.removeCallbacksAndMessages(null)
                 press(null)
             }
         }
@@ -241,7 +260,8 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
         rows = letterRows
         shift = Shift.OFF
         pressed = null
-        handler.removeCallbacks(repeatBackspace)
+        longPressed = false
+        handler.removeCallbacksAndMessages(null)
         layoutKeys()
         invalidate()
     }
@@ -256,14 +276,11 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
     override fun onDraw(canvas: Canvas) {
         for (row in rows) {
             for (key in row) {
-                val isModifier = key.kind != Kind.CHAR && key.kind != Kind.SPACE
-                val down = key === pressed
-                // Letters sit on a surface tile; modifiers stay bare so the alphabet reads first.
+                val seated = key.kind == Kind.SPACE || key.kind == Kind.ENTER
                 val fill = when {
-                    down && isModifier -> surface
-                    down -> hairline
-                    isModifier -> 0
-                    else -> surface
+                    key === pressed -> hairline
+                    seated -> surface
+                    else -> 0
                 }
                 if (fill != 0) {
                     keyFill.color = fill
@@ -279,9 +296,17 @@ class KeyboardView @JvmOverloads constructor(context: Context, attrs: AttributeS
         val cy = key.bounds.centerY()
         when (key.kind) {
             Kind.CHAR -> {
+                val hint = key.secondary?.takeUnless { symbols }
+                if (hint != null) {
+                    label.color = colorTertiary
+                    label.textSize = 10f * resources.displayMetrics.scaledDensity
+                    canvas.drawText(hint, cx, key.bounds.top + 15f * density, label)
+                }
                 label.color = colorPrimary
-                label.textSize = 20f * resources.displayMetrics.scaledDensity
-                canvas.drawText(faceOf(key), cx, cy - (label.descent() + label.ascent()) / 2f, label)
+                label.textSize = 21f * resources.displayMetrics.scaledDensity
+                // Nudge the letter down when a number sits above it, so the pair reads as one key.
+                val baseline = cy - (label.descent() + label.ascent()) / 2f + if (hint != null) 5f * density else 0f
+                canvas.drawText(faceOf(key), cx, baseline, label)
             }
             Kind.LAYER -> {
                 label.color = colorSecondary
