@@ -112,10 +112,15 @@ class DodoIme : InputMethodService() {
         handler.removeCallbacks(meter)
         val length = recorder.stop()
         state = State.IDLE
-        when {
-            length < 400 -> return render(getString(R.string.status_too_short))
-            // Whisper invents text ("Thank you.") for silent audio, so don't send it.
-            recorder.peak < 700 -> return render(getString(R.string.status_silence))
+        // Whisper invents text ("Thank you.") for silent audio, so don't send it.
+        val rejected = when {
+            length < 400 -> R.string.status_too_short
+            recorder.peak < 700 -> R.string.status_silence
+            else -> null
+        }
+        if (rejected != null) {
+            recorder.file.delete()
+            return render(getString(rejected))
         }
 
         state = State.TRANSCRIBING

@@ -11,8 +11,34 @@ object Prefs {
     private fun sp(c: Context): SharedPreferences =
         c.getSharedPreferences("dodo", Context.MODE_PRIVATE)
 
-    fun apiKey(c: Context): String = sp(c).getString("api_key", "").orEmpty().trim()
-    fun setApiKey(c: Context, v: String) = sp(c).edit().putString("api_key", v.trim()).apply()
+    /** Decrypted once per process; the IME reads this on every dictation. */
+    @Volatile private var cachedKey: String? = null
+
+    fun apiKey(c: Context): String {
+        cachedKey?.let { return it }
+        val prefs = sp(c)
+        // Builds before 1.0.2 stored the key as plain text: move it into the vault on first read.
+        prefs.getString("api_key", null)?.let { legacy ->
+            setApiKey(c, legacy)
+            return legacy.trim()
+        }
+        val key = prefs.getString("api_key_enc", null)?.let(KeyVault::decrypt).orEmpty()
+        cachedKey = key
+        return key
+    }
+
+    fun setApiKey(c: Context, v: String) {
+        val key = v.trim()
+        cachedKey = key
+        val edit = sp(c).edit().remove("api_key")
+        if (key.isEmpty()) {
+            edit.remove("api_key_enc")
+        } else {
+            // If the keystore is unavailable the key is kept for this session only rather than written in the clear.
+            KeyVault.encrypt(key)?.let { edit.putString("api_key_enc", it) } ?: edit.remove("api_key_enc")
+        }
+        edit.apply()
+    }
 
     fun model(c: Context): String = sp(c).getString("model", MODEL_TURBO) ?: MODEL_TURBO
     fun setModel(c: Context, v: String) = sp(c).edit().putString("model", v).apply()
