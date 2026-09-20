@@ -28,4 +28,11 @@
     <color name="kb_pill">#FFFFFF</color>
     <color name="kb_on_pill">#000000</color>
     <color name="kb_muted">#9A9A9C</color>
+
+    <!-- In dark the bar and the deck are the same tone; measured off the reference screenshot. -->
+    <color name="kb_bar">#2B2B2B</color>
+    <color name="kb_cancel">#484848</color>
+    <color name="kb_on_cancel">#FFFFFF</color>
+    <color name="kb_confirm">#FFFFFF</color>
+    <color name="kb_on_confirm">#1A1A1A</color>
 </resources>

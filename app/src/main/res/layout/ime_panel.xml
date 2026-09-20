@@ -1,68 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  The Wispr Flow arrangement: one bar of our own above a keyboard that is otherwise the platform's.
-  Menu on the left, a filled Start pill on the right, and the status line only speaks when it has
-  something to say.
+  Two faces of the same panel, stacked so they are always the same height and nothing jumps.
+
+  Typing: a bar of ours over a keyboard that is otherwise the platform's.
+  Listening: the keyboard is taken over entirely — discard, a level meter, one word, insert. The
+  typing face stays INVISIBLE rather than GONE, which is what holds the height steady.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/kb_bg"
-    android:orientation="vertical">
+    android:background="@color/kb_bg">
 
     <LinearLayout
+        android:id="@+id/typing_face"
         android:layout_width="match_parent"
-        android:layout_height="68dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="14dp"
-        android:paddingEnd="6dp">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/btn_menu"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@drawable/bg_panel_key"
-            android:contentDescription="@string/cd_menu"
-            android:padding="8dp"
-            android:src="@drawable/ic_menu"
-            android:tint="@color/kb_label" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:background="@color/kb_bar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="14dp"
+            android:paddingEnd="6dp">
 
-        <TextView
-            android:id="@+id/status"
-            android:layout_width="0dp"
+            <ImageButton
+                android:id="@+id/btn_menu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_panel_key"
+                android:contentDescription="@string/cd_menu"
+                android:padding="8dp"
+                android:src="@drawable/ic_menu"
+                android:tint="@color/kb_label" />
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif"
+                android:maxLines="2"
+                android:textColor="@color/kb_muted"
+                android:textSize="13sp" />
+
+            <com.zaynikhlaq.dodostt.StartPillView
+                android:id="@+id/pill"
+                android:layout_width="106dp"
+                android:layout_height="44dp"
+                android:contentDescription="@string/cd_mic" />
+        </LinearLayout>
+
+        <com.zaynikhlaq.dodostt.KeyboardView
+            android:id="@+id/keyboard"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif"
-            android:maxLines="2"
-            android:text="@string/status_idle"
-            android:textColor="@color/kb_muted"
-            android:textSize="13sp" />
+            android:paddingBottom="6dp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/listening_face"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <ImageButton
             android:id="@+id/btn_cancel"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/bg_panel_key"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="top|start"
+            android:layout_margin="14dp"
+            android:background="@drawable/bg_cancel"
             android:contentDescription="@string/cd_cancel"
-            android:padding="9dp"
+            android:padding="13dp"
             android:src="@drawable/ic_close"
-            android:tint="@color/kb_muted"
-            android:visibility="invisible" />
+            android:tint="@color/kb_on_cancel" />
 
-        <com.zaynikhlaq.dodostt.StartPillView
-            android:id="@+id/pill"
-            android:layout_width="106dp"
-            android:layout_height="44dp"
-            android:contentDescription="@string/cd_mic" />
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/btn_done"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="14dp"
+            android:background="@drawable/bg_confirm"
+            android:contentDescription="@string/cd_done"
+            android:padding="13dp"
+            android:src="@drawable/ic_check"
+            android:tint="@color/kb_on_confirm" />
 
-    <com.zaynikhlaq.dodostt.KeyboardView
-        android:id="@+id/keyboard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="6dp" />
-</LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <com.zaynikhlaq.dodostt.WaveformView
+                android:id="@+id/wave"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp" />
+
+            <TextView
+                android:id="@+id/listening_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="21dp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="-0.02"
+                android:text="@string/listening"
+                android:textColor="@color/kb_label"
+                android:textSize="22sp" />
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

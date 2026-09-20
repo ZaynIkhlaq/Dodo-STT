@@ -25,6 +25,9 @@
     <string name="cd_keys">Keyboard</string>
     <string name="cd_menu">Dodo settings</string>
 
+    <string name="listening">Listening</string>
+    <string name="cd_done">Insert what you said</string>
+
     <string name="pill_start">Start</string>
     <string name="pill_stop">Stop</string>
     <string name="pill_busy">Typing</string>

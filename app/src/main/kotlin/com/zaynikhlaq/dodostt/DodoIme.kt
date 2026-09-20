@@ -3,7 +3,6 @@ package com.zaynikhlaq.dodostt
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.Looper
@@ -60,14 +59,19 @@ class DodoIme : InputMethodService() {
 
     private var status: TextView? = null
     private var pill: StartPillView? = null
-    private var cancel: ImageButton? = null
     private var keyboard: KeyboardView? = null
+    private var typingFace: View? = null
+    private var listeningFace: View? = null
+    private var wave: WaveformView? = null
+    private var listeningLabel: TextView? = null
 
     private val meter = object : Runnable {
         override fun run() {
             if (state != State.RECORDING) return
             if (!recorder.isRecording) return finishRecording()
-            pill?.setLevel(recorder.level())
+            val level = recorder.level()
+            pill?.setLevel(level)
+            wave?.setLevel(level)
             renderTimer()
             considerCut()
             handler.postDelayed(this, 60)
@@ -83,13 +87,20 @@ class DodoIme : InputMethodService() {
         val view = layoutInflater.inflate(R.layout.ime_panel, null)
         status = view.findViewById(R.id.status)
         pill = view.findViewById(R.id.pill)
-        cancel = view.findViewById(R.id.btn_cancel)
+        typingFace = view.findViewById(R.id.typing_face)
+        listeningFace = view.findViewById(R.id.listening_face)
+        wave = view.findViewById(R.id.wave)
+        listeningLabel = view.findViewById(R.id.listening_label)
 
         pill?.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             onMicTapped()
         }
-        cancel?.setOnClickListener { discard() }
+        view.findViewById<ImageButton>(R.id.btn_cancel).setOnClickListener { discard() }
+        view.findViewById<ImageButton>(R.id.btn_done).setOnClickListener {
+            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+            if (state == State.RECORDING) finishRecording()
+        }
         status?.setOnClickListener {
             when {
                 pendingInsert != null -> insertStranded()
@@ -315,9 +326,17 @@ class DodoIme : InputMethodService() {
         startActivity(Intent(this, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
+    /**
+     * The reference shows one word and no clock. A minute in, that stops being calm and starts
+     * being a way to lose track of a long dictation, so the time joins the label after 60 s.
+     */
     private fun renderTimer() {
         val seconds = (SystemClock.elapsedRealtime() - sessionStartedAt) / 1000
-        status?.text = getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
+        listeningLabel?.text = if (seconds < 60) {
+            getString(R.string.listening)
+        } else {
+            getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
+        }
     }
 
     private fun render(message: String? = null) {
@@ -326,9 +345,13 @@ class DodoIme : InputMethodService() {
             State.RECORDING -> StartPillView.Mode.RECORDING
             State.TRANSCRIBING -> StartPillView.Mode.BUSY
         }
+        // Recording takes the whole panel. The typing face stays INVISIBLE, not GONE, so the panel
+        // keeps its height and the keyboard doesn't jump out from under the user's thumb.
         val live = state == State.RECORDING
-        cancel?.visibility = if (live) View.VISIBLE else View.INVISIBLE
-        cancel?.imageTintList = ColorStateList.valueOf(getColor(if (live) R.color.rec else R.color.kb_muted))
+        listeningFace?.visibility = if (live) View.VISIBLE else View.GONE
+        typingFace?.visibility = if (live) View.INVISIBLE else View.VISIBLE
+        wave?.live = live
+        if (live) renderTimer()
 
         val pending = pendingInsert
         status?.text = message ?: when {

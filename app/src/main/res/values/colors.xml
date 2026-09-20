@@ -33,4 +33,11 @@
     <color name="kb_pill">#111114</color>
     <color name="kb_on_pill">#FFFFFF</color>
     <color name="kb_muted">#5A5E68</color>
+
+    <!-- Their bar sits LIGHTER than the deck below it; measured #E8E9ED over #D0D3D8. -->
+    <color name="kb_bar">#E8E9ED</color>
+    <color name="kb_cancel">#FFFFFF</color>
+    <color name="kb_on_cancel">#383B41</color>
+    <color name="kb_confirm">#383B41</color>
+    <color name="kb_on_confirm">#FFFFFF</color>
 </resources>
