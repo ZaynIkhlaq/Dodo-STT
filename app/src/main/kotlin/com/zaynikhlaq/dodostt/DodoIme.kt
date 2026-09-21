@@ -81,6 +81,7 @@ class DodoIme : InputMethodService() {
     override fun onCreate() {
         super.onCreate()
         recorder = Recorder(this)
+        Updater.schedule(this)
     }
 
     override fun onCreateInputView(): View {
@@ -133,6 +134,7 @@ class DodoIme : InputMethodService() {
         attached = true
         if (!restarting) keyboard?.reset()
         render()
+        Updater.maybeCheck(this)
         val idle = state == State.IDLE && pendingInsert == null
         if (!restarting && idle && isReady() && Prefs.autoStart(this)) startRecording()
     }
@@ -142,6 +144,7 @@ class DodoIme : InputMethodService() {
         attached = false
         // Recording deliberately carries on. A screen timeout in the middle of a long dictation used
         // to throw all of it away; MicService keeps the microphone open until there is a real pause.
+        reportBusy()
     }
 
     override fun onDestroy() {
@@ -363,5 +366,9 @@ class DodoIme : InputMethodService() {
             !Setup.hasKey(this) -> getString(R.string.status_no_key)
             else -> getString(R.string.status_idle)
         }
+        reportBusy()
     }
+
+    /** An update installs by replacing this process, so it waits until the keyboard is put away. */
+    private fun reportBusy() = Updater.setKeyboardBusy(this, attached || state != State.IDLE)
 }

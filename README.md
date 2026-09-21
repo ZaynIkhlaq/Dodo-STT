@@ -23,6 +23,11 @@ Samsung voice input, so there is no floating bubble over your screen.
    warning for every third-party keyboard; see [Privacy](#privacy) for what this one actually does.
 3. The key step links straight to [console.groq.com/keys](https://console.groq.com/keys). Paste the
    key in and tap **Test**.
+4. Under **Updates** in settings, tap **Allow** once. From then on Dodo checks GitHub for a new
+   release every hour (and whenever the keyboard opens), downloads it in the background, and
+   installs it about ten seconds after you close the keyboard — never while you are typing or
+   dictating. On Android 12 and later that happens without a prompt; older versions show a
+   notification to tap.
 
 ## Use
 
@@ -54,7 +59,8 @@ keyboard list are sorted, that block disappears.
   your key. The recording is deleted from the phone as soon as it has been transcribed or discarded.
   How Groq handles it is covered by [Groq's privacy policy](https://groq.com/privacy-policy/).
 - There are no analytics, ads, accounts, or third-party libraries. The app talks to no server other
-  than Groq.
+  than Groq, and GitHub for updates: it reads the latest release of this repository and downloads the
+  APK, sending nothing about you. Android refuses any update not signed with the release key.
 - Your API key is encrypted with a key held in the Android Keystore and is excluded from cloud
   backups and phone-to-phone transfers. It never leaves the device except as the authorization header
   on requests to Groq.
