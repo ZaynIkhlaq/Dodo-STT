@@ -25,11 +25,9 @@
     <string name="cd_keys">Keyboard</string>
     <string name="cd_menu">Dodo settings</string>
 
-    <string name="listening">Listening</string>
-    <string name="cd_done">Insert what you said</string>
 
     <string name="pill_start">Start</string>
-    <string name="pill_stop">Stop</string>
+    <string name="pill_stop">Done</string>
     <string name="pill_busy">Typing</string>
 
     <!-- Onboarding -->
@@ -53,7 +51,7 @@
     <string name="ob_key_get">Get a free key</string>
 
     <string name="ob_done_title">You\'re set</string>
-    <string name="ob_done_body">Tap any text field, then the keyboard-switch icon in the corner of your screen, and pick Dodo. Speak, tap the orb, and your words land in the field.</string>
+    <string name="ob_done_body">Tap any text field, then the keyboard-switch icon in the corner of your screen, and pick Dodo. Tap Start, speak, tap Done, and your words land in the field.</string>
     <string name="ob_done_action">Start using Dodo</string>
     <string name="ob_skip">Skip for now</string>
 

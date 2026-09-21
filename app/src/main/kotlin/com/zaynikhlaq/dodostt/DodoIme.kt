@@ -7,13 +7,18 @@ import android.inputmethodservice.InputMethodService
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.text.InputType
+import android.transition.Fade
+import android.transition.TransitionManager
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageButton
 import android.widget.TextView
+import kotlin.math.abs
 
 /**
  * A voice-first input method: a mic over a keyboard. Speech is cut into segments at pauses and each
@@ -32,6 +37,8 @@ class DodoIme : InputMethodService() {
         const val MAX_SEGMENT_MS = 18_000L
         /** With no field on screen, this much silence means the phone was put down. */
         const val ABANDONED_MS = 30_000L
+        /** Two spaces this close together become ". ". */
+        const val DOUBLE_SPACE_MS = 700L
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -60,10 +67,11 @@ class DodoIme : InputMethodService() {
     private var status: TextView? = null
     private var pill: StartPillView? = null
     private var keyboard: KeyboardView? = null
-    private var typingFace: View? = null
-    private var listeningFace: View? = null
-    private var wave: WaveformView? = null
-    private var listeningLabel: TextView? = null
+    private var bar: ViewGroup? = null
+    private var menuButton: View? = null
+    private var cancelButton: View? = null
+    /** Whether the toolbar is currently showing its recording face, so transitions run only on a change. */
+    private var barLive = false
 
     private val meter = object : Runnable {
         override fun run() {
@@ -71,12 +79,14 @@ class DodoIme : InputMethodService() {
             if (!recorder.isRecording) return finishRecording()
             val level = recorder.level()
             pill?.setLevel(level)
-            wave?.setLevel(level)
             renderTimer()
             considerCut()
             handler.postDelayed(this, 60)
         }
     }
+
+    /** A quick cross-fade between the toolbar's idle and recording faces. */
+    private val barTransition = Fade().setDuration(160)
 
     override fun onCreate() {
         super.onCreate()
@@ -88,19 +98,18 @@ class DodoIme : InputMethodService() {
         val view = layoutInflater.inflate(R.layout.ime_panel, null)
         status = view.findViewById(R.id.status)
         pill = view.findViewById(R.id.pill)
-        typingFace = view.findViewById(R.id.typing_face)
-        listeningFace = view.findViewById(R.id.listening_face)
-        wave = view.findViewById(R.id.wave)
-        listeningLabel = view.findViewById(R.id.listening_label)
+        bar = view.findViewById(R.id.bar)
+        menuButton = view.findViewById(R.id.btn_menu)
+        cancelButton = view.findViewById(R.id.btn_cancel)
+        barLive = false
 
         pill?.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
             onMicTapped()
         }
-        view.findViewById<ImageButton>(R.id.btn_cancel).setOnClickListener { discard() }
-        view.findViewById<ImageButton>(R.id.btn_done).setOnClickListener {
+        view.findViewById<ImageButton>(R.id.btn_cancel).setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            if (state == State.RECORDING) finishRecording()
+            discard()
         }
         status?.setOnClickListener {
             when {
@@ -115,13 +124,15 @@ class DodoIme : InputMethodService() {
         }
 
         keyboard = view.findViewById(R.id.keyboard)
+        val overlay = view.findViewById<KeyOverlayView>(R.id.key_overlay)
+        overlay.keyboard = keyboard
+        keyboard?.overlay = overlay
         keyboard?.listener = object : KeyboardView.Listener {
-            override fun onText(text: String) {
-                currentInputConnection?.commitText(text, 1)
-            }
-
+            override fun onText(text: String) = typeKey(text)
             override fun onBackspace() = backspace()
+            override fun onDeleteWord() = deleteWord()
             override fun onEnter() = pressEnter()
+            override fun onCursor(steps: Int) = moveCursor(steps)
         }
         render()
         return view
@@ -132,11 +143,20 @@ class DodoIme : InputMethodService() {
     override fun onStartInputView(info: EditorInfo?, restarting: Boolean) {
         super.onStartInputView(info, restarting)
         attached = true
-        if (!restarting) keyboard?.reset()
+        if (!restarting) keyboard?.reset(numeric = isNumeric(info))
+        keyboard?.setEnterAction(enterAction(info))
+        updateShift()
         render()
         Updater.maybeCheck(this)
         val idle = state == State.IDLE && pendingInsert == null
         if (!restarting && idle && isReady() && Prefs.autoStart(this)) startRecording()
+    }
+
+    override fun onUpdateSelection(
+        oldSelStart: Int, oldSelEnd: Int, newSelStart: Int, newSelEnd: Int, candidatesStart: Int, candidatesEnd: Int,
+    ) {
+        super.onUpdateSelection(oldSelStart, oldSelEnd, newSelStart, newSelEnd, candidatesStart, candidatesEnd)
+        updateShift()
     }
 
     override fun onFinishInputView(finishingInput: Boolean) {
@@ -298,6 +318,83 @@ class DodoIme : InputMethodService() {
 
     // --- keys ------------------------------------------------------------------------------------
 
+    private var lastSpaceAt = 0L
+
+    /** Types a key, turning a quick double space after a word into ". " the way stock keyboards do. */
+    private fun typeKey(text: String) {
+        val ic = currentInputConnection ?: return
+        if (text == " ") {
+            val now = SystemClock.uptimeMillis()
+            val before = ic.getTextBeforeCursor(2, 0)
+            val doubled = now - lastSpaceAt < DOUBLE_SPACE_MS && isProse(currentInputEditorInfo) &&
+                before != null && before.length == 2 && before[1] == ' ' && before[0].isLetterOrDigit()
+            lastSpaceAt = if (doubled) 0L else now
+            if (doubled) {
+                ic.beginBatchEdit()
+                ic.deleteSurroundingText(1, 0)
+                ic.commitText(". ", 1)
+                ic.endBatchEdit()
+                return
+            }
+        }
+        ic.commitText(text, 1)
+    }
+
+    /** Capitalises the next letter wherever the field asks for it: a sentence start, say. */
+    private fun updateShift() {
+        val info = currentInputEditorInfo ?: return
+        val ic = currentInputConnection ?: return
+        val caps = info.inputType != InputType.TYPE_NULL && ic.getCursorCapsMode(info.inputType) != 0
+        keyboard?.setAutoShift(caps)
+    }
+
+    private fun moveCursor(steps: Int) {
+        val code = if (steps < 0) KeyEvent.KEYCODE_DPAD_LEFT else KeyEvent.KEYCODE_DPAD_RIGHT
+        repeat(abs(steps)) { sendDownUpKeyEvents(code) }
+    }
+
+    /** Deletes back to the start of the previous word, spaces after it included. */
+    private fun deleteWord() {
+        val ic = currentInputConnection ?: return
+        if (!ic.getSelectedText(0).isNullOrEmpty()) return backspace()
+        val before = ic.getTextBeforeCursor(64, 0) ?: return
+        var start = before.length
+        while (start > 0 && before[start - 1].isWhitespace()) start--
+        while (start > 0 && !before[start - 1].isWhitespace()) start--
+        val count = before.length - start
+        if (count > 0) ic.deleteSurroundingText(count, 0) else backspace()
+    }
+
+    private fun isNumeric(info: EditorInfo?): Boolean = when ((info?.inputType ?: 0) and InputType.TYPE_MASK_CLASS) {
+        InputType.TYPE_CLASS_NUMBER, InputType.TYPE_CLASS_PHONE, InputType.TYPE_CLASS_DATETIME -> true
+        else -> false
+    }
+
+    /** Ordinary text, as opposed to a URL, an address, or a password, where ". " would be wrong. */
+    private fun isProse(info: EditorInfo?): Boolean {
+        val type = info?.inputType ?: return false
+        if (type and InputType.TYPE_MASK_CLASS != InputType.TYPE_CLASS_TEXT) return false
+        return when (type and InputType.TYPE_MASK_VARIATION) {
+            InputType.TYPE_TEXT_VARIATION_URI, InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS,
+            InputType.TYPE_TEXT_VARIATION_WEB_EMAIL_ADDRESS, InputType.TYPE_TEXT_VARIATION_PASSWORD,
+            InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD, InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD -> false
+            else -> true
+        }
+    }
+
+    private fun enterAction(info: EditorInfo?): KeyboardView.Enter {
+        val options = info?.imeOptions ?: return KeyboardView.Enter.NEWLINE
+        if (options and EditorInfo.IME_FLAG_NO_ENTER_ACTION != 0) return KeyboardView.Enter.NEWLINE
+        return when (options and EditorInfo.IME_MASK_ACTION) {
+            EditorInfo.IME_ACTION_GO -> KeyboardView.Enter.GO
+            EditorInfo.IME_ACTION_SEARCH -> KeyboardView.Enter.SEARCH
+            EditorInfo.IME_ACTION_SEND -> KeyboardView.Enter.SEND
+            EditorInfo.IME_ACTION_NEXT -> KeyboardView.Enter.NEXT
+            EditorInfo.IME_ACTION_DONE -> KeyboardView.Enter.DONE
+            else -> KeyboardView.Enter.NEWLINE
+        }
+    }
+
     private fun pressEnter() {
         val action = currentInputEditorInfo?.imeOptions?.and(EditorInfo.IME_MASK_ACTION) ?: EditorInfo.IME_ACTION_NONE
         val noEnterAction = (currentInputEditorInfo?.imeOptions ?: 0) and EditorInfo.IME_FLAG_NO_ENTER_ACTION != 0
@@ -329,17 +426,11 @@ class DodoIme : InputMethodService() {
         startActivity(Intent(this, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    /**
-     * The reference shows one word and no clock. A minute in, that stops being calm and starts
-     * being a way to lose track of a long dictation, so the time joins the label after 60 s.
-     */
+    /** "Listening · 0:07" in the toolbar, so a long dictation never loses track of itself. */
     private fun renderTimer() {
         val seconds = (SystemClock.elapsedRealtime() - sessionStartedAt) / 1000
-        listeningLabel?.text = if (seconds < 60) {
-            getString(R.string.listening)
-        } else {
-            getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
-        }
+        val text = getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
+        if (status?.text?.toString() != text) status?.text = text
     }
 
     private fun render(message: String? = null) {
@@ -348,19 +439,24 @@ class DodoIme : InputMethodService() {
             State.RECORDING -> StartPillView.Mode.RECORDING
             State.TRANSCRIBING -> StartPillView.Mode.BUSY
         }
-        // Recording takes the whole panel. The typing face stays INVISIBLE, not GONE, so the panel
-        // keeps its height and the keyboard doesn't jump out from under the user's thumb.
+        // Recording changes the toolbar and nothing else: the keys stay put and stay live.
         val live = state == State.RECORDING
-        listeningFace?.visibility = if (live) View.VISIBLE else View.GONE
-        typingFace?.visibility = if (live) View.INVISIBLE else View.VISIBLE
-        wave?.live = live
-        if (live) renderTimer()
+        if (live != barLive) {
+            barLive = live
+            bar?.let { TransitionManager.beginDelayedTransition(it, barTransition) }
+            menuButton?.visibility = if (live) View.GONE else View.VISIBLE
+            cancelButton?.visibility = if (live) View.VISIBLE else View.GONE
+        }
 
         val pending = pendingInsert
+        if (live && message == null) {
+            renderTimer()
+            reportBusy()
+            return
+        }
         status?.text = message ?: when {
             pending != null -> getString(R.string.status_pending, pending.split(' ').size)
             state == State.TRANSCRIBING -> getString(R.string.status_transcribing)
-            state == State.RECORDING -> getString(R.string.status_listening, "0:00")
             errorMessage != null -> errorMessage
             !hasMic() -> getString(R.string.status_no_mic)
             !Setup.hasKey(this) -> getString(R.string.status_no_key)

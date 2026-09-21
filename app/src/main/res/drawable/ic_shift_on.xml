@@ -1,0 +1,8 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Shift for one letter: the chevron filled, without caps lock's bar. -->
+    <path android:fillColor="#FFFFFFFF" android:strokeColor="#FFFFFFFF" android:strokeWidth="1.7"
+        android:strokeLineJoin="round"
+        android:pathData="M12,4.6 L19.4,12.2 H15.5 V18.4 H8.5 V12.2 H4.6 Z" />
+</vector>

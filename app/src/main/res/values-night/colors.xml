@@ -21,18 +21,19 @@
     <color name="switch_track_on">#666B85FF</color>
     <color name="switch_track_off">#3A3A42</color>
 
-    <color name="kb_bg">#2B2B2B</color>
-    <color name="kb_key">#6F7072</color>
-    <color name="kb_mod">#484848</color>
-    <color name="kb_label">#FFFFFF</color>
-    <color name="kb_pill">#FFFFFF</color>
+    <!-- Samsung Keyboard's default dark theme: near-black deck, charcoal keys, modifiers a step lighter. -->
+    <color name="kb_bg">#141414</color>
+    <color name="kb_key">#2C2C2E</color>
+    <color name="kb_mod">#3A3A3C</color>
+    <color name="kb_label">#F2F2F2</color>
+    <color name="kb_hint">#9A9A9E</color>
+    <color name="kb_press">#29FFFFFF</color>
+    <color name="kb_accent">#5C95FF</color>
+    <color name="kb_on_accent">#FFFFFF</color>
+    <color name="kb_pill">#F2F2F2</color>
     <color name="kb_on_pill">#000000</color>
-    <color name="kb_muted">#9A9A9C</color>
-
-    <!-- In dark the bar and the deck are the same tone; measured off the reference screenshot. -->
-    <color name="kb_bar">#2B2B2B</color>
-    <color name="kb_cancel">#484848</color>
-    <color name="kb_on_cancel">#FFFFFF</color>
-    <color name="kb_confirm">#FFFFFF</color>
-    <color name="kb_on_confirm">#1A1A1A</color>
+    <color name="kb_muted">#A0A0A5</color>
+    <color name="kb_bar">#141414</color>
+    <color name="kb_cancel">#3A3A3C</color>
+    <color name="kb_on_cancel">#F2F2F2</color>
 </resources>

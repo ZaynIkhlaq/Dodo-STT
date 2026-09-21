@@ -2,8 +2,8 @@
 
 Fast, accurate voice typing for Android, powered by [Groq](https://groq.com)'s Whisper.
 
-Dodo STT is a keyboard that listens first. A mic orb sits above a normal QWERTY layout: speak and
-tap, and what you said is typed into whatever text field you were in, in any app — then fix a typo
+Dodo STT is a keyboard that listens first. A voice pill sits in the toolbar above a normal QWERTY layout: speak
+and tap, and what you said is typed into whatever text field you were in, in any app — then fix a typo
 with the keys right below, without switching keyboards. It lives in the same place as Google or
 Samsung voice input, so there is no floating bubble over your screen.
 
@@ -35,11 +35,16 @@ Samsung voice input, so there is no floating bubble over your screen.
 2. Tap the keyboard-switch icon in the bottom corner of the screen and pick **Dodo STT**. On Samsung
    phones, turn the icon on under Settings → General management → Keyboard list and default →
    Keyboard button on navigation bar.
-3. Speak. Tap the orb when you are done and the text appears.
+3. Speak. Tap **Done** on the pill when you are finished and the text appears.
 
-The orb pulses with your voice while it listens and spins while Groq works. Beside it sit discard
-and a button that returns to your previous keyboard; below it is a full QWERTY layout with shift
-(double-tap to lock), a `?123` symbol layer, and backspace that repeats when held.
+Dictation lives in the toolbar: the pill's bars follow your voice, a timer counts up beside it, and
+✕ discards. The keys stay on screen the whole time, so you can fix a typo mid-sentence. Hold the
+menu button to go back to your previous keyboard.
+
+The keyboard follows Samsung Keyboard's feel: light and dark themes that follow the system, a tint
+and preview bubble on every press, auto-capitals, double-space for a full stop, and long-press for
+numbers, accents and punctuation (hold `.`). Drag along the space bar to move the cursor; hold
+backspace and it speeds up from letters to whole words. `!#1` has two symbol pages.
 
 ## Settings
 
