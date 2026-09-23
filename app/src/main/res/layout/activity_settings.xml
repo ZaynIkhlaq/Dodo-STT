@@ -155,6 +155,24 @@
 
         <TextView style="@style/Hint" android:text="@string/language_hint" />
 
+        <!-- Updates -->
+        <TextView style="@style/SectionLabel" android:text="@string/section_updates" />
+
+        <LinearLayout style="@style/Row">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <TextView android:id="@+id/update_title" style="@style/RowTitle" />
+                <TextView android:id="@+id/update_state" style="@style/RowState" android:layout_marginTop="2dp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/update_action"
+                style="@style/TextButton" />
+        </LinearLayout>
+
         <!-- Try -->
         <TextView style="@style/SectionLabel" android:text="@string/section_try" />
 
