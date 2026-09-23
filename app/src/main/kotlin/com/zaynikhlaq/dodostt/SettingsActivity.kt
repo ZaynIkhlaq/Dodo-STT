@@ -28,6 +28,8 @@ class SettingsActivity : Activity() {
     private lateinit var micState: TextView
     private lateinit var barState: TextView
     private lateinit var recordState: TextView
+    private lateinit var barTitle: TextView
+    private lateinit var barHealth: TextView
     private lateinit var keyField: EditText
     private lateinit var keyState: TextView
     private lateinit var updateTitle: TextView
@@ -56,6 +58,11 @@ class SettingsActivity : Activity() {
         micState = findViewById(R.id.mic_state)
         barState = findViewById(R.id.bar_state)
         recordState = findViewById(R.id.record_state)
+        barTitle = findViewById(R.id.bar_title)
+        barHealth = findViewById(R.id.bar_health)
+        findViewById<Button>(R.id.bar_settings).setOnClickListener {
+            runCatching { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+        }
         keyField = findViewById(R.id.key)
         keyState = findViewById(R.id.key_state)
         updateTitle = findViewById(R.id.update_title)
@@ -145,10 +152,31 @@ class SettingsActivity : Activity() {
         recordRow.visibility = if (recordTodo) View.VISIBLE else View.GONE
         setupDivider.visibility = if (micTodo && barTodo) View.VISIBLE else View.GONE
         recordDivider.visibility = if (recordTodo && (micTodo || barTodo)) View.VISIBLE else View.GONE
+        renderBar(barTodo, recordTodo)
         val any = micTodo || barTodo || recordTodo
         setupLabel.visibility = if (any) View.VISIBLE else View.GONE
         setupGroup.visibility = if (any) View.VISIBLE else View.GONE
         renderUpdates()
+    }
+
+    /**
+     * The bar lives in another process with no UI of its own, so this row is the only place its
+     * state is visible: on or off, running or not, and what Android said if it refused the window.
+     */
+    private fun renderBar(barTodo: Boolean, recordTodo: Boolean) {
+        barTitle.setText(if (barTodo) R.string.bar_off else R.string.bar_on)
+        val error = BarStatus.lastError
+        val health = when {
+            barTodo -> getString(R.string.bar_off_why)
+            error != null -> getString(R.string.bar_failed, error)
+            !BarStatus.connected -> getString(R.string.bar_stalled)
+            recordTodo -> getString(R.string.bar_no_record)
+            BarStatus.showing -> getString(R.string.bar_showing)
+            else -> getString(R.string.bar_waiting)
+        }
+        barHealth.text = health
+        val warn = barTodo || recordTodo || error != null || !BarStatus.connected
+        barHealth.setTextColor(getColor(if (warn) R.color.warn else R.color.text_secondary))
     }
 
     private fun renderUpdates() {

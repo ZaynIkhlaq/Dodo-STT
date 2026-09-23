@@ -32,6 +32,21 @@ import android.widget.TextView
  * The service watches for a focused editable field, parks the bar over the top edge of the keyboard,
  * and types what you said into whatever has the cursor.
  */
+/**
+ * What the bar is doing, for the settings screen to report. A phone has no logcat, so without this
+ * a bar that never appears gives the user nothing to go on.
+ */
+object BarStatus {
+    /** The service is switched on and running. */
+    @Volatile var connected = false
+    /** The bar is on screen right now. */
+    @Volatile var showing = false
+    /** A keyboard was visible the last time the bar looked. */
+    @Volatile var keyboardSeen = false
+    /** Why the window wouldn't go up, if it wouldn't. */
+    @Volatile var lastError: String? = null
+}
+
 class DodoAccessibility : AccessibilityService(), Dictation.Sink {
 
     private companion object {
@@ -77,6 +92,8 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
             gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
         }
         buildBar()
+        BarStatus.connected = true
+        BarStatus.lastError = null
         Updater.schedule(this)
     }
 
@@ -91,6 +108,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     override fun onInterrupt() = Unit
 
     override fun onUnbind(intent: Intent?): Boolean {
+        BarStatus.connected = false
         dictation.destroy()
         hide()
         handler.removeCallbacksAndMessages(null)
@@ -155,27 +173,36 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     /** Shows the bar where it belongs, or takes it away when there is nothing to dictate into. */
     private val reposition = Runnable {
         val live = dictation.state != Dictation.State.IDLE
-        // Keep the bar through a dictation even if focus wanders; otherwise it follows the cursor.
-        if (!live && pendingInsert == null && focusedEditable() == null) return@Runnable hide()
-        val lift = dp(LIFT_DP)
         val keyboardTop = keyboardTop()
-        params.y = if (keyboardTop > 0) (screenHeight() - keyboardTop + lift).toInt() else dp(FLOOR_DP).toInt()
+        BarStatus.keyboardSeen = keyboardTop > 0
+        // A keyboard on screen is enough: some apps never report a focused node, and hiding the bar
+        // in those is worse than showing one that has nowhere to type — it would insert by clipboard.
+        val wanted = live || pendingInsert != null || keyboardTop > 0 || focusedEditable() != null
+        if (!wanted) return@Runnable hide()
+        params.y = if (keyboardTop > 0) (screenHeight() - keyboardTop + dp(LIFT_DP)).toInt() else dp(FLOOR_DP).toInt()
         show()
     }
 
     private fun show() {
         val view = bar ?: return
         if (attachedToWindow) {
-            wm.updateViewLayout(view, params)
-        } else {
-            runCatching { wm.addView(view, params) }.onSuccess { attachedToWindow = true }
+            runCatching { wm.updateViewLayout(view, params) }
+            return
         }
+        runCatching { wm.addView(view, params) }
+            .onSuccess {
+                attachedToWindow = true
+                BarStatus.showing = true
+                BarStatus.lastError = null
+            }
+            .onFailure { BarStatus.lastError = it.message ?: it.javaClass.simpleName }
     }
 
     private fun hide() {
         val view = bar ?: return
         if (!attachedToWindow) return
         attachedToWindow = false
+        BarStatus.showing = false
         runCatching { wm.removeView(view) }
     }
 

@@ -56,6 +56,16 @@
 
     <!-- Settings -->
     <string name="section_setup">Needs attention</string>
+    <string name="section_bar">The bar</string>
+    <string name="bar_off">Off</string>
+    <string name="bar_off_why">Turn Dodo on under Accessibility and the bar appears above your keyboard</string>
+    <string name="bar_on">On</string>
+    <string name="bar_showing">Showing above your keyboard right now</string>
+    <string name="bar_waiting">Tap a text field and it appears above the keyboard</string>
+    <string name="bar_stalled">Switched on, but not running — turn it off and on again under Accessibility</string>
+    <string name="bar_failed">Android refused the bar: %1$s</string>
+    <string name="bar_no_record">Allow \"Recording from other apps\" or dictation will hear silence</string>
+
     <string name="section_key">Groq key</string>
     <string name="section_model">Model</string>
     <string name="section_language">Language</string>
