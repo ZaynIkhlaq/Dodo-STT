@@ -53,7 +53,9 @@
     <string name="section_setup">Needs attention</string>
     <string name="hint_hold">Hold to dictate</string>
     <string name="hint_no_field">Tap a text field first</string>
-    <string name="hint_setup">Finish setting Dodo up</string>
+    <string name="hint_no_mic">We can\'t hear you — allow the microphone</string>
+    <string name="hint_no_record">Allow recording from other apps</string>
+    <string name="hint_no_key">Add your Groq key</string>
     <string name="hint_discarded">Thrown away</string>
 
     <string name="section_bar">The button</string>

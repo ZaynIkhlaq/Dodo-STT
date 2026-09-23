@@ -47,6 +47,11 @@ object Prefs {
     fun language(c: Context): String = sp(c).getString("language", "en").orEmpty()
     fun setLanguage(c: Context, v: String) = sp(c).edit().putString("language", v).apply()
 
+    /** True once Android has refused to install an update quietly; after that, always ask. */
+    fun updateNeedsConfirm(c: Context): Boolean = sp(c).getBoolean("update_confirm", false)
+
+    fun setUpdateNeedsConfirm(c: Context, v: Boolean) = sp(c).edit().putBoolean("update_confirm", v).apply()
+
     /** Where the button sits: which edge, and how far down in pixels. */
     fun orbOnLeft(c: Context): Boolean = sp(c).getBoolean("orb_left", false)
 

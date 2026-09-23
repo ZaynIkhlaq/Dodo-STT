@@ -139,6 +139,10 @@ object Updater {
         }
     }
 
+    /** The APK of the install being attempted, kept so a refusal can be retried with a prompt. */
+    @Volatile private var lastApk: File? = null
+    @Volatile private var silentAttempt = false
+
     private var appContext: Context? = null
     private val settled = Runnable { appContext?.let(::installIfIdle) }
 
@@ -255,11 +259,20 @@ object Updater {
         }
     }
 
-    private fun install(c: Context, apk: File) {
+    /**
+     * [silent] asks Android to skip the confirm dialog. It only grants that to an app whose own
+     * installer it recognises, and a sideloaded Dodo has none — so the first refusal turns this off
+     * for good and every update after it asks, which is one tap and always works.
+     */
+    private fun install(c: Context, apk: File, silent: Boolean = !Prefs.updateNeedsConfirm(c)) {
+        lastApk = apk
+        silentAttempt = silent
         val installer = c.packageManager.packageInstaller
         val params = PackageInstaller.SessionParams(PackageInstaller.SessionParams.MODE_FULL_INSTALL).apply {
             setAppPackageName(c.packageName)
-            if (Build.VERSION.SDK_INT >= 31) setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+            if (Build.VERSION.SDK_INT >= 31 && silent) {
+                setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
+            }
         }
         val id = installer.createSession(params)
         installer.openSession(id).use { session ->
@@ -292,8 +305,21 @@ object Updater {
                 notifyConfirm(c, confirm)
             }
             PackageInstaller.STATUS_SUCCESS -> Unit
-            else -> main.post {
-                lastError = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE) ?: "The update didn't install"
+            else -> {
+                val reason = intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE).orEmpty()
+                // "Self update is blocked by unknown source package": Android won't do this one
+                // quietly. Ask instead, from now on and right now.
+                val apk = lastApk
+                if (silentAttempt && apk != null && apk.exists()) {
+                    Prefs.setUpdateNeedsConfirm(c, true)
+                    executor.execute {
+                        runCatching { install(c, apk, silent = false) }.onFailure { e ->
+                            main.post { lastError = e.message ?: e.javaClass.simpleName }
+                        }
+                    }
+                    return
+                }
+                main.post { lastError = reason.ifEmpty { "The update didn't install" } }
             }
         }
     }

@@ -239,8 +239,14 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     }
 
     private fun start() {
-        if (!Setup.hasKey(this) || !Setup.hasMic(this) || !Setup.canRecordInBackground(this)) {
-            say(getString(R.string.hint_setup))
+        val missing = when {
+            !Setup.hasMic(this) -> R.string.hint_no_mic
+            !Setup.canRecordInBackground(this) -> R.string.hint_no_record
+            !Setup.hasKey(this) -> R.string.hint_no_key
+            else -> 0
+        }
+        if (missing != 0) {
+            say(getString(missing))
             return openSettings()
         }
         // Dictating into nothing would strand every word on the clipboard; say so instead.
