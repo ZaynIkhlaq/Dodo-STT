@@ -21,7 +21,7 @@
     <color name="switch_track_on">#666B85FF</color>
     <color name="switch_track_off">#3A3A42</color>
 
-    <!-- The button in the dark. -->
-    <color name="orb_bg">#26262A</color>
-    <color name="orb_ink">#F2F2F2</color>
+    <!-- The docked tile in the dark. -->
+    <color name="tab_bg">#2A2A2E</color>
+    <color name="tab_ink">#F2F2F2</color>
 </resources>

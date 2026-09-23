@@ -2,13 +2,12 @@
 
 Fast, accurate voice typing for Android, powered by [Groq](https://groq.com)'s Whisper.
 
-Dodo STT is a bar, not a keyboard. Keep the keyboard you already use — Samsung's, Gboard, whatever —
-and Dodo floats a small pill just above it. Tap it in any app, speak, tap again, and what you said is
-typed where your cursor is.
+Dodo STT is a button, not a keyboard. Keep the keyboard you already use — Samsung's, Gboard,
+whatever — and Dodo docks a small tile against the edge of the screen. Hold it, talk, let go, and
+what you said is typed where your cursor is.
 
 - **Accurate.** Uses Whisper large v3 (turbo by default), not the phone's built-in recognizer.
-- **Fast.** Groq returns a transcript in about a second, and long dictations arrive in pieces as you
-  speak rather than all at once at the end.
+- **Fast.** Groq returns a transcript in about a second.
 - **Out of the way.** Your keyboard, your layout, your muscle memory. Dodo adds one pill above it.
 - **Simple.** One bar, one settings screen. No account, no subscription.
 - **Yours.** You bring your own Groq API key. Groq's free tier covers normal dictation.
@@ -31,13 +30,16 @@ typed where your cursor is.
 
 ## Use
 
-1. Tap any text field. Your own keyboard comes up, with Dodo's bar above it.
-2. Tap **Start** and speak. The bars in the pill follow your voice and a timer counts up beside them.
-3. Tap **Done**. The text lands at your cursor. ✕ throws the recording away instead.
+1. Tap any text field. Dodo's tile appears against the edge of the screen, beside your keyboard.
+2. **Hold it and talk.** Let go and what you said is typed at your cursor.
+3. Or **double-tap** to lock it listening, hands free, and tap once to finish.
 
-The bar follows the keyboard, so it sits above Samsung's keys whatever height they are, and it goes
-away when no text field has the cursor. Text you dictate while the screen is off, or after the field
-is gone, is held rather than dropped: it goes on the clipboard and the bar offers to insert it.
+While recording the tile grows out of the edge into a pill with a level rail and a clock. Slide your
+finger away before letting go to throw the recording away. Drag the tile anywhere along either edge;
+it stays where you put it.
+
+Recording is sent to Groq in one piece when you finish, not streamed in fragments — a minute of
+speech comes back in about a second, and the transcript is better for having heard the whole thing.
 
 ## Settings
 
@@ -71,10 +73,10 @@ Requires JDK 17 and the Android SDK (API 35). There is no Gradle wrapper in the 
 The app has no third-party dependencies — not AppCompat, not Material — so every control on screen is
 either a framework widget or a custom `View` in this repo.
 
-`Dictation` owns a session end to end — recording, cutting speech into segments at pauses, and
-committing transcripts in order — and knows nothing about where the text goes.
-`DodoAccessibility` is the bar: an accessibility overlay window, which is the only window type
-Android layers *above* the keyboard, plus `ACTION_SET_TEXT` on the focused node to type.
+`Dictation` owns a session end to end — record, send, hand back the text — and knows nothing about
+where that text goes. `DodoAccessibility` is the button: an accessibility overlay window, which is
+the only window type Android layers *above* the keyboard, plus `ACTION_SET_TEXT` on the focused node
+to type. `DodoTab` is the tile, one view that changes shape rather than a set that come and go.
 
 ```bash
 gradle :app:assembleDebug

@@ -183,14 +183,24 @@ class OnboardingActivity : Activity() {
         segments.forEachIndexed { i, seg -> seg.backgroundTintList = if (i <= step) accent else idle }
 
         val micDone = Setup.hasMic(this)
-        val barDone = barReady()
+        val serviceOn = Setup.barOn(this)
+        val recordOn = Setup.canRecordInBackground(this)
+        val barDone = serviceOn && recordOn
         findViewById<View>(R.id.mic_ok).visibility = if (micDone) View.VISIBLE else View.INVISIBLE
-        findViewById<View>(R.id.bar_ok).visibility = if (barDone) View.VISIBLE else View.INVISIBLE
+        findViewById<View>(R.id.bar_ok).visibility = if (serviceOn) View.VISIBLE else View.INVISIBLE
+        findViewById<View>(R.id.record_ok).visibility = if (recordOn) View.VISIBLE else View.INVISIBLE
 
         primary.text = when (step) {
             WELCOME -> getString(R.string.ob_start)
             MIC -> getString(if (micDone) R.string.ob_continue else R.string.ob_mic_action)
-            BAR -> getString(if (barDone) R.string.ob_continue else R.string.ob_bar_action)
+            // Two switches behind one step, so the button names whichever is still missing.
+            BAR -> getString(
+                when {
+                    barDone -> R.string.ob_continue
+                    !serviceOn -> R.string.ob_bar_action
+                    else -> R.string.ob_record_action
+                }
+            )
             KEY -> getString(R.string.ob_continue)
             else -> getString(R.string.ob_done_action)
         }

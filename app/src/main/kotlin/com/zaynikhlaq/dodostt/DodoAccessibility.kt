@@ -13,7 +13,6 @@ import android.os.Looper
 import android.os.SystemClock
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -21,8 +20,8 @@ import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
-import android.widget.TextView
 import kotlin.math.abs
+import kotlin.math.hypot
 
 /**
  * What the bar is doing, for the settings screen to report. A phone has no logcat, so without this
@@ -49,19 +48,22 @@ object BarStatus {
  * apps" window is layered *below* it — and it is also the only way to put text into a field this app
  * doesn't own.
  *
- * Starting a dictation is deliberate: hold the button, or double-tap it. A single tap can't start
- * one, because a button that lives under your thumb would otherwise record every time you brushed
- * it. Once it is recording, a single tap finishes and types; holding throws the recording away.
+ * One button, three gestures. Hold it and talk, like a walkie-talkie: let go and what you said is
+ * typed. Double-tap instead and it locks on, hands free, until you tap it again. Drag it anywhere
+ * along either edge. A single tap does nothing on its own, because a button that lives under a
+ * thumb would otherwise record every time it was brushed.
  */
 class DodoAccessibility : AccessibilityService(), Dictation.Sink {
 
     private companion object {
         /** Events arrive in bursts — a focus change is three or four — so measure once they settle. */
         const val SETTLE_MS = 50L
-        /** Hold this long to start dictating. */
-        const val HOLD_MS = 450L
-        /** Two taps inside this also start one. */
+        /** Hold this long and it starts listening, for as long as you keep holding. */
+        const val HOLD_MS = 280L
+        /** Two taps inside this lock it on instead. */
         const val DOUBLE_TAP_MS = 320L
+        /** Slide this far from the button while holding and letting go throws it away. */
+        const val CANCEL_DP = 110f
         /** How long a word of help stays up. */
         const val HINT_MS = 1900L
     }
@@ -71,9 +73,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     private lateinit var wm: WindowManager
     private lateinit var params: WindowManager.LayoutParams
 
-    private var root: View? = null
-    private var orb: OrbView? = null
-    private var hint: TextView? = null
+    private var tab: DodoTab? = null
     private var attachedToWindow = false
 
     /** Text with nowhere to go, waiting for a tap to place it. */
@@ -81,6 +81,8 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     private var shownSeconds = -1L
 
     private val bounds = Rect()
+
+    private fun dp(value: Float) = value * resources.displayMetrics.density
     private val slop by lazy { ViewConfiguration.get(this).scaledTouchSlop }
 
     // --- the finger on the button ---
@@ -90,6 +92,10 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     private var dragging = false
     private var held = false
     private var lastTapAt = 0L
+    /** Recording because the finger is still down, as opposed to locked on by a double-tap. */
+    private var pushing = false
+    /** The finger has slid away from the button: letting go now throws the recording away. */
+    private var cancelArmed = false
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -132,12 +138,11 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     // --- the button ------------------------------------------------------------------------------
 
     private fun build() {
-        val view = LayoutInflater.from(this).inflate(R.layout.floating_orb, null)
-        orb = view.findViewById(R.id.orb)
-        hint = view.findViewById(R.id.hint)
-        orb?.setOnTouchListener { _, event -> onOrbTouch(event) }
-        root = view
-        faceHint(Prefs.orbOnLeft(this))
+        val view = DodoTab(this)
+        view.contentDescription = getString(R.string.cd_mic)
+        view.dockedLeft = Prefs.orbOnLeft(this)
+        view.setOnTouchListener { _, event -> onOrbTouch(event) }
+        tab = view
         render()
     }
 
@@ -157,24 +162,38 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
                 handler.postDelayed(hold, HOLD_MS)
             }
             MotionEvent.ACTION_MOVE -> {
+                if (pushing) {
+                    // Sliding away from the button is how you take it back mid-sentence.
+                    val far = hypot(event.rawX - downX, event.rawY - downY) > dp(CANCEL_DP)
+                    if (far != cancelArmed) {
+                        cancelArmed = far
+                        tab?.armed = far
+                        if (far) say(getString(R.string.hint_release_cancel))
+                    }
+                    return true
+                }
                 if (!dragging && (abs(event.rawX - downX) > slop || abs(event.rawY - downY) > slop)) {
                     dragging = true
                     handler.removeCallbacks(hold)
                 }
                 if (dragging) {
                     params.y = (startY + (event.rawY - downY)).toInt()
-                        .coerceIn(0, screenHeight() - (root?.height ?: 0))
-                    runCatching { wm.updateViewLayout(root, params) }
+                        .coerceIn(0, screenHeight() - (tab?.height ?: 0))
+                    runCatching { wm.updateViewLayout(tab, params) }
                 }
             }
             MotionEvent.ACTION_UP -> {
                 handler.removeCallbacks(hold)
                 when {
+                    pushing -> release()
                     dragging -> settle(event.rawX)
                     !held -> onTap()
                 }
             }
-            MotionEvent.ACTION_CANCEL -> handler.removeCallbacks(hold)
+            MotionEvent.ACTION_CANCEL -> {
+                handler.removeCallbacks(hold)
+                if (pushing) release()
+            }
         }
         return true
     }
@@ -184,22 +203,18 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         val onLeft = x < screenWidth() / 2f
         Prefs.setOrbPosition(this, onLeft, params.y)
         params.gravity = Gravity.TOP or (if (onLeft) Gravity.START else Gravity.END)
-        faceHint(onLeft)
-        runCatching { wm.updateViewLayout(root, params) }
-    }
-
-    /** The label hangs off the side the button isn't on, so it never runs off the screen. */
-    private fun faceHint(onLeft: Boolean) {
-        root?.layoutDirection = if (onLeft) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR
+        tab?.dockedLeft = onLeft
+        runCatching { wm.updateViewLayout(tab, params) }
     }
 
     private val hold = Runnable {
         held = true
         when (dictation.state) {
-            Dictation.State.IDLE -> start()
-            // Holding a running dictation is how you throw it away.
+            // Hold to talk: it listens for as long as the finger stays down.
+            Dictation.State.IDLE -> pushing = start()
+            // Holding one that is locked on is how you throw it away.
             Dictation.State.RECORDING -> {
-                orb?.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                tab?.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 dictation.discard()
                 say(getString(R.string.hint_discarded))
                 render()
@@ -208,10 +223,25 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         }
     }
 
+    /** The finger came off a hold: send what was said, or throw it away if it slid off first. */
+    private fun release() {
+        pushing = false
+        tab?.armed = false
+        tab?.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+        if (cancelArmed) {
+            cancelArmed = false
+            dictation.discard()
+            say(getString(R.string.hint_discarded))
+            render()
+        } else {
+            dictation.stop()
+        }
+    }
+
     private fun onTap() {
         when (dictation.state) {
             Dictation.State.RECORDING -> {
-                orb?.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                tab?.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 dictation.stop()
                 render()
             }
@@ -225,9 +255,10 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
                         if (insert(held)) pendingInsert = null
                         render()
                     }
+                    // Double-tap locks it on: talk with both hands free, tap once to finish.
                     now - lastTapAt < DOUBLE_TAP_MS -> {
                         lastTapAt = 0L
-                        start()
+                        if (start()) say(getString(R.string.hint_locked))
                     }
                     else -> {
                         lastTapAt = now
@@ -238,7 +269,8 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         }
     }
 
-    private fun start() {
+    /** True if it is now recording. */
+    private fun start(): Boolean {
         val missing = when {
             !Setup.hasMic(this) -> R.string.hint_no_mic
             !Setup.canRecordInBackground(this) -> R.string.hint_no_record
@@ -247,31 +279,35 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         }
         if (missing != 0) {
             say(getString(missing))
-            return openSettings()
+            openSettings()
+            return false
         }
         // Dictating into nothing would strand every word on the clipboard; say so instead.
-        if (focusedEditable() == null) return say(getString(R.string.hint_no_field))
-        orb?.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        if (focusedEditable() == null) {
+            say(getString(R.string.hint_no_field))
+            return false
+        }
+        tab?.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         shownSeconds = -1L
-        if (!dictation.start()) say(getString(R.string.status_mic_busy))
+        val started = dictation.start()
+        if (!started) say(getString(R.string.status_mic_busy))
         render()
+        return started
     }
 
     private fun openSettings() {
         startActivity(Intent(this, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    /** A word beside the button, gone again in a moment. */
+    /** A word beside the glyph, in the tile itself, gone again in a moment. */
     private fun say(text: String) {
-        val label = hint ?: return
-        label.text = text
-        label.visibility = View.VISIBLE
+        tab?.label = text
         handler.removeCallbacks(clearHint)
         handler.postDelayed(clearHint, HINT_MS)
     }
 
     private val clearHint = Runnable {
-        if (dictation.state != Dictation.State.RECORDING) hint?.visibility = View.GONE
+        if (dictation.state != Dictation.State.RECORDING) tab?.label = null
     }
 
     /** Shows the button where it belongs, or takes it away when there is nothing to dictate into. */
@@ -286,7 +322,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     }
 
     private fun show() {
-        val view = root ?: return
+        val view = tab ?: return
         if (attachedToWindow) return
         runCatching { wm.addView(view, params) }
             .onSuccess {
@@ -298,7 +334,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     }
 
     private fun hide() {
-        val view = root ?: return
+        val view = tab ?: return
         if (!attachedToWindow) return
         attachedToWindow = false
         BarStatus.showing = false
@@ -323,10 +359,10 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
 
     private fun render() {
         val state = dictation.state
-        orb?.mode = when (state) {
-            Dictation.State.IDLE -> OrbView.Mode.IDLE
-            Dictation.State.RECORDING -> OrbView.Mode.RECORDING
-            Dictation.State.TRANSCRIBING -> OrbView.Mode.BUSY
+        tab?.mode = when (state) {
+            Dictation.State.IDLE -> DodoTab.Mode.IDLE
+            Dictation.State.RECORDING -> DodoTab.Mode.RECORDING
+            Dictation.State.TRANSCRIBING -> DodoTab.Mode.BUSY
         }
         val held = pendingInsert
         when {
@@ -407,24 +443,23 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     override fun onState(state: Dictation.State) = render()
 
     override fun onLevel(level: Float) {
-        orb?.setLevel(level)
-        // Sixty times a second is far too often to touch the label; only the clock moves.
+        tab?.setLevel(level)
+        // Sixteen times a second is far too often to touch the label; only the clock moves.
         val seconds = dictation.elapsedMs / 1000
         if (seconds != shownSeconds) {
             shownSeconds = seconds
-            hint?.text = "%d:%02d".format(seconds / 60, seconds % 60)
-            hint?.visibility = View.VISIBLE
+            tab?.label = "%d:%02d".format(seconds / 60, seconds % 60)
         }
     }
 
-    override fun onFinished(delivered: Int, stranded: String?, error: String?) {
+    override fun onFinished(delivered: Boolean, stranded: String?, error: String?) {
         if (stranded != null) {
             // Don't guess where it belongs — the field may be long gone. Offer it, and put it on the
             // clipboard so it survives even if the offer is never taken.
             pendingInsert = stranded
             copyToClipboard(stranded)
         }
-        val message = error ?: if (delivered == 0 && stranded == null) getString(R.string.status_silence) else null
+        val message = error ?: if (!delivered && stranded == null) getString(R.string.status_silence) else null
         message?.let(::say)
         render()
     }

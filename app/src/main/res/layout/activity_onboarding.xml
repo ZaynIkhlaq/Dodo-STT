@@ -108,11 +108,16 @@
             <TextView style="@style/Title" android:text="@string/ob_bar_title" />
             <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_bar_body" />
 
+            <TextView
+                style="@style/Hint"
+                android:layout_marginTop="18dp"
+                android:text="@string/ob_bar_path" />
+
             <LinearLayout
                 android:id="@+id/bar_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
+                android:layout_marginTop="18dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:visibility="invisible">
@@ -128,6 +133,29 @@
                     style="@style/RowState"
                     android:layout_marginStart="8dp"
                     android:text="@string/ob_bar_enabled"
+                    android:textColor="@color/ok" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/record_ok"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="invisible">
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_check"
+                    android:tint="@color/ok" />
+
+                <TextView
+                    style="@style/RowState"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/ob_record_allowed"
                     android:textColor="@color/ok" />
             </LinearLayout>
         </LinearLayout>
@@ -194,6 +222,12 @@
 
             <TextView style="@style/Title" android:text="@string/ob_done_title" />
             <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_done_body" />
+
+            <TextView
+                style="@style/Body"
+                android:layout_marginTop="18dp"
+                android:text="@string/ob_done_gestures"
+                android:textColor="@color/text_primary" />
 
             <EditText
                 android:id="@+id/try_field"

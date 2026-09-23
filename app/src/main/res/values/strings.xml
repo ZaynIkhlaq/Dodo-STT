@@ -39,6 +39,9 @@
     <string name="ob_bar_body">Dodo\'s button is an accessibility service, which is the only way Android lets an app float over your keyboard and type into the field you are in. Android shows a broad warning for every one of these. Dodo looks at where your cursor is and nothing else, and sends audio nowhere but Groq.</string>
     <string name="ob_bar_action">Open accessibility settings</string>
     <string name="ob_bar_enabled">The button is on</string>
+    <string name="ob_bar_path">Accessibility → Installed apps → Dodo STT. If the switch is greyed out, open Apps → Dodo STT → ⋮ → Allow restricted settings first.</string>
+    <string name="ob_record_allowed">Recording from other apps is allowed</string>
+    <string name="ob_record_action">Allow appear on top</string>
 
     <string name="ob_key_title">Connect Groq</string>
     <string name="ob_key_body">Dodo transcribes with your own Groq key, so there is no account and no subscription. The free tier covers normal dictation.</string>
@@ -46,12 +49,15 @@
 
     <string name="ob_done_title">You\'re set</string>
     <string name="ob_done_body">Tap any text field and Dodo\'s button appears at the edge of the screen. Hold it, speak, then tap it, and your words land in the field. Drag it wherever you like.</string>
+    <string name="ob_done_gestures">Hold the button and talk. Let go and it types.\n\nDouble-tap to lock it listening, hands free. Tap once to finish.\n\nDrag it anywhere along either edge.</string>
     <string name="ob_done_action">Start using Dodo</string>
     <string name="ob_skip">Skip for now</string>
 
     <!-- Settings -->
     <string name="section_setup">Needs attention</string>
-    <string name="hint_hold">Hold to dictate</string>
+    <string name="hint_hold">Hold to talk · double-tap to lock</string>
+    <string name="hint_locked">Listening — tap to finish</string>
+    <string name="hint_release_cancel">Let go to cancel</string>
     <string name="hint_no_field">Tap a text field first</string>
     <string name="hint_no_mic">We can\'t hear you — allow the microphone</string>
     <string name="hint_no_record">Allow recording from other apps</string>
