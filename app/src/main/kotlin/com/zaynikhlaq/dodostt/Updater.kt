@@ -25,8 +25,8 @@ import java.util.concurrent.Executors
  *
  * Every push to main publishes a signed APK whose tag ends in the build number, and the build
  * number is the versionCode, so "is there something newer" is one integer comparison. A newer APK is
- * downloaded in the background and installed through PackageInstaller the next time the keyboard is
- * out of use — never while it is on screen or mid-dictation, because installing kills this process.
+ * downloaded in the background and installed through PackageInstaller the next time Dodo is idle —
+ * never mid-dictation, because installing kills the process the bar is running in.
  *
  * From Android 12 an app updating itself can skip the confirmation dialog once the user has let it
  * install apps, so after that one grant updates simply happen. Where Android still insists on asking,
@@ -38,9 +38,9 @@ object Updater {
     private const val ASSET = "dodo-stt.apk"
     private const val JOB_ID = 1
     private const val CHECK_EVERY_MS = 60 * 60 * 1000L
-    /** Opening the keyboard also checks, but not more often than this. */
+    /** Starting a dictation also checks, but not more often than this. */
     private const val MIN_GAP_MS = 15 * 60 * 1000L
-    /** Hopping between fields closes and reopens the keyboard; wait this long before trusting it's gone. */
+    /** Hopping between fields makes the bar come and go; wait this long before trusting it is idle. */
     private const val SETTLE_MS = 10_000L
     private const val CHANNEL = "updates"
     private const val NOTIFICATION_ID = 2
@@ -51,11 +51,11 @@ object Updater {
 
     /** elapsedRealtime of the last check this process made; 0 before the first. */
     @Volatile private var lastCheckAt = 0L
-    /** Downloaded, verified, and waiting for the keyboard to be out of use. */
+    /** Downloaded, verified, and waiting for a quiet moment to install. */
     @Volatile private var ready: File? = null
 
     // Main thread only.
-    private var keyboardBusy = false
+    private var dictating = false
     private var checking = false
     /** Newest version seen on GitHub, or 0 before the first successful check. */
     var latest = 0L
@@ -74,7 +74,7 @@ object Updater {
 
     val isChecking: Boolean get() = checking
 
-    /** A version that is downloaded and will install once the keyboard closes, or null. */
+    /** A version that is downloaded and will install at the next quiet moment, or null. */
     val waiting: Long? get() = ready?.let { latest.takeIf { it > 0 } }
 
     /** Registers the hourly background check. Cheap to call repeatedly. */
@@ -98,7 +98,7 @@ object Updater {
         checkNow(c)
     }
 
-    /** Checks GitHub, downloads anything newer, and installs it if the keyboard isn't in use. */
+    /** Checks GitHub, downloads anything newer, and installs it if nothing is being dictated. */
     fun checkNow(c: Context, done: (() -> Unit)? = null) {
         val app = c.applicationContext
         if (checking) {
@@ -123,12 +123,12 @@ object Updater {
     }
 
     /**
-     * The keyboard reports whether it is in use: on screen or mid-dictation. The moment it isn't, a
-     * waiting update goes in. (Stranded text doesn't hold it up — that is already on the clipboard.)
+     * Dodo reports when a dictation is running. The moment one isn't, a waiting update goes in.
+     * (Stranded text doesn't hold it up — that is already on the clipboard.)
      */
-    fun setKeyboardBusy(c: Context, busy: Boolean) {
-        if (busy == keyboardBusy) return
-        keyboardBusy = busy
+    fun setDictating(c: Context, busy: Boolean) {
+        if (busy == dictating) return
+        dictating = busy
         main.removeCallbacks(settled)
         if (!busy) {
             appContext = c.applicationContext
@@ -212,7 +212,7 @@ object Updater {
 
     private fun installIfIdle(c: Context) {
         val apk = ready ?: return
-        if (keyboardBusy || !canInstall(c)) return
+        if (dictating || !canInstall(c)) return
         ready = null
         executor.execute {
             runCatching { install(c, apk) }.onFailure { e ->

@@ -24,22 +24,11 @@
     <color name="switch_track_on">#663D5AFE</color>
     <color name="switch_track_off">#DAD6CE</color>
 
-    <!-- Keyboard, after Samsung Keyboard's default light theme: white letter keys on a pale deck,
-         modifiers a step greyer, no borders or shadows, and the toolbar the same tone as the deck.
-         Samsung doesn't publish these; they are estimates to be tuned against the real thing. -->
-    <color name="kb_bg">#F0F0F3</color>
-    <color name="kb_key">#FFFFFF</color>
-    <color name="kb_mod">#DCDCE1</color>
-    <color name="kb_label">#1C1C1E</color>
-    <color name="kb_hint">#8A8A8E</color>
-    <!-- Laid over a key while it is held, then faded out. -->
-    <color name="kb_press">#1F000000</color>
-    <color name="kb_accent">#387AFF</color>
-    <color name="kb_on_accent">#FFFFFF</color>
-    <color name="kb_pill">#1C1C1E</color>
-    <color name="kb_on_pill">#FFFFFF</color>
-    <color name="kb_muted">#6E6E73</color>
-    <color name="kb_bar">#F0F0F3</color>
-    <color name="kb_cancel">#DCDCE1</color>
-    <color name="kb_on_cancel">#1C1C1E</color>
+    <!-- The floating bar: a pale slab over whatever app you are in, and the pill inside it. -->
+    <color name="float_bg">#FFFFFF</color>
+    <color name="bar_pill">#1C1C1E</color>
+    <color name="bar_on_pill">#FFFFFF</color>
+    <color name="bar_muted">#6E6E73</color>
+    <color name="bar_cancel">#ECECEF</color>
+    <color name="bar_on_cancel">#1C1C1E</color>
 </resources>

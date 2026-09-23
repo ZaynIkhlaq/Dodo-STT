@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dodo's bar is an accessibility overlay because that is the only window Android layers above the
+  keyboard, and the only way to type into a field this app doesn't own. It reads nothing else:
+  the events below are what tell it where the keyboard is and whether a text field has the cursor.
+-->
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:accessibilityEventTypes="typeViewFocused|typeViewTextSelectionChanged|typeWindowStateChanged|typeWindowsChanged"
+    android:accessibilityFeedbackType="feedbackGeneric"
+    android:accessibilityFlags="flagRetrieveInteractiveWindows|flagDefault"
+    android:canRetrieveWindowContent="true"
+    android:description="@string/a11y_description"
+    android:notificationTimeout="50"
+    android:summary="@string/a11y_summary" />

@@ -98,18 +98,18 @@
 
         <!-- 2 · Keyboard -->
         <LinearLayout
-            android:id="@+id/step_keyboard"
+            android:id="@+id/step_bar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <TextView style="@style/Title" android:text="@string/ob_kb_title" />
-            <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_kb_body" />
+            <TextView style="@style/Title" android:text="@string/ob_bar_title" />
+            <TextView style="@style/Body" android:layout_marginTop="12dp" android:text="@string/ob_bar_body" />
 
             <LinearLayout
-                android:id="@+id/kb_ok"
+                android:id="@+id/bar_ok"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
@@ -127,7 +127,7 @@
                 <TextView
                     style="@style/RowState"
                     android:layout_marginStart="8dp"
-                    android:text="@string/ob_kb_enabled"
+                    android:text="@string/ob_bar_enabled"
                     android:textColor="@color/ok" />
             </LinearLayout>
         </LinearLayout>
@@ -203,13 +203,6 @@
                 android:hint="@string/try_hint"
                 android:inputType="textMultiLine|textCapSentences"
                 android:minLines="3" />
-
-            <Button
-                android:id="@+id/switch_keyboard"
-                style="@style/TextButton"
-                android:layout_marginStart="-10dp"
-                android:layout_marginTop="4dp"
-                android:text="@string/switch_keyboard" />
         </LinearLayout>
     </FrameLayout>
 

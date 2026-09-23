@@ -13,10 +13,9 @@ import android.os.IBinder
 /**
  * Exists only so the process holds foreground importance while a dictation is running.
  *
- * Android cuts microphone access for background processes, and when the screen times out the IME's
- * window goes away — which is exactly how a long dictation used to get thrown on the floor. The
- * recorder still lives in [DodoIme]; this service does nothing but keep the process alive enough to
- * be allowed to hear.
+ * Android cuts microphone access for background processes, and the bar lives in someone else's app
+ * — which is exactly how a long dictation used to get thrown on the floor. The recorder lives in
+ * [Dictation]; this service does nothing but keep the process alive enough to be allowed to hear.
  */
 class MicService : Service() {
     companion object {

@@ -56,8 +56,8 @@ class StartPillView @JvmOverloads constructor(context: Context, attrs: Attribute
     private val pill = RectF()
     private val barRect = RectF()
 
-    private val pillColor = context.getColor(R.color.kb_pill)
-    private val onPill = context.getColor(R.color.kb_on_pill)
+    private val pillColor = context.getColor(R.color.bar_pill)
+    private val onPill = context.getColor(R.color.bar_on_pill)
     private val recording = context.getColor(R.color.rec)
 
     init {

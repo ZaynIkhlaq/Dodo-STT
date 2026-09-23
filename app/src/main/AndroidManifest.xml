@@ -9,6 +9,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Android only lets an app record from the background when it holds this, so the bar keeps
+         the microphone while you are in someone else's app. It is not used to draw anything: the bar
+         itself is an accessibility overlay, which is what puts it above the keyboard. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
     <!-- Self-updating from GitHub releases. The second lets Android 12+ skip the confirm dialog, and
          the third keeps the hourly check registered across reboots. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
@@ -64,17 +69,19 @@
             </intent-filter>
         </receiver>
 
+        <!-- The bar: an overlay window above the keyboard, and the only way to type into a field
+             this app doesn't own. -->
         <service
-            android:name=".DodoIme"
+            android:name=".DodoAccessibility"
             android:exported="true"
             android:label="@string/app_name"
-            android:permission="android.permission.BIND_INPUT_METHOD">
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
-                <action android:name="android.view.InputMethod" />
+                <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>
             <meta-data
-                android:name="android.view.im"
-                android:resource="@xml/method" />
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service" />
         </service>
     </application>
 </manifest>

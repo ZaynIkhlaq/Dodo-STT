@@ -22,7 +22,6 @@
     <string name="cd_cancel">Discard recording</string>
     <string name="cd_mic">Start or stop dictation</string>
     <string name="cd_mark">Dodo</string>
-    <string name="cd_keys">Keyboard</string>
     <string name="cd_menu">Dodo settings</string>
 
 
@@ -31,7 +30,7 @@
     <string name="pill_busy">Typing</string>
 
     <!-- Onboarding -->
-    <string name="ob_welcome_body">A keyboard with no keys. Open it in any app, speak, and what you said is typed where your cursor is.</string>
+    <string name="ob_welcome_body">A bar that floats above your own keyboard. Tap it in any app, speak, and what you said is typed where your cursor is.</string>
     <string name="ob_start">Get started</string>
     <string name="ob_continue">Continue</string>
 
@@ -41,17 +40,17 @@
     <string name="ob_mic_settings">Open app settings</string>
     <string name="ob_mic_granted">Microphone allowed</string>
 
-    <string name="ob_kb_title">Turn Dodo on</string>
-    <string name="ob_kb_body">Dodo lives in your keyboard list, beside Gboard. Android shows the same warning for every third-party keyboard — Dodo has no keys, so it never sees what you type on your normal one.</string>
-    <string name="ob_kb_action">Open keyboard settings</string>
-    <string name="ob_kb_enabled">Dodo is in your keyboard list</string>
+    <string name="ob_bar_title">Turn the bar on</string>
+    <string name="ob_bar_body">Dodo\'s bar is an accessibility service, which is the only way Android lets an app float above your keyboard and type into the field you are in. Android shows a broad warning for every one of these. Dodo looks at where your cursor is and nothing else, and sends audio nowhere but Groq.</string>
+    <string name="ob_bar_action">Open accessibility settings</string>
+    <string name="ob_bar_enabled">The bar is on</string>
 
     <string name="ob_key_title">Connect Groq</string>
     <string name="ob_key_body">Dodo transcribes with your own Groq key, so there is no account and no subscription. The free tier covers normal dictation.</string>
     <string name="ob_key_get">Get a free key</string>
 
     <string name="ob_done_title">You\'re set</string>
-    <string name="ob_done_body">Tap any text field, then the keyboard-switch icon in the corner of your screen, and pick Dodo. Tap Start, speak, tap Done, and your words land in the field.</string>
+    <string name="ob_done_body">Tap any text field and your keyboard comes up with Dodo\'s bar above it. Tap Start, speak, tap Done, and your words land in the field.</string>
     <string name="ob_done_action">Start using Dodo</string>
     <string name="ob_skip">Skip for now</string>
 
@@ -60,15 +59,21 @@
     <string name="section_key">Groq key</string>
     <string name="section_model">Model</string>
     <string name="section_language">Language</string>
-    <string name="section_behaviour">Behaviour</string>
     <string name="section_try">Try it</string>
+
+    <string name="step_record">Recording from other apps</string>
+    <string name="step_record_action">Allow</string>
+    <string name="step_record_why">Android won\'t let Dodo hear you outside its own screen</string>
+
+    <string name="a11y_summary">Floats a dictation bar above your keyboard and types what you say.</string>
+    <string name="a11y_description">Dodo uses this to place its bar above your keyboard and to type what you dictate into the field you are in. It looks at where the cursor is and nothing else, keeps no record of what you type, and sends audio only to Groq with your own key.</string>
 
     <string name="step_mic">Microphone</string>
     <string name="step_mic_action">Allow</string>
-    <string name="step_enable">Dodo in your keyboard list</string>
-    <string name="step_enable_action">Open</string>
+    <string name="step_bar">The Dodo bar</string>
+    <string name="step_bar_action">Open</string>
     <string name="step_mic_why">Dodo can\'t record without it</string>
-    <string name="step_enable_why">Dodo won\'t appear in the keyboard switcher</string>
+    <string name="step_bar_why">The bar won\'t appear above your keyboard</string>
 
     <string name="key_hint">gsk_…</string>
     <string name="key_test">Test</string>
@@ -85,8 +90,6 @@
     <string name="language_auto">Automatic</string>
     <string name="language_hint">English stops accented English being read as another language. Automatic handles anything Whisper supports.</string>
 
-    <string name="opt_autostart">Start listening when the panel opens</string>
-    <string name="opt_autoreturn">Return to my keyboard after each dictation</string>
 
     <string name="section_updates">Updates</string>
     <string name="update_version">Version %1$s</string>
@@ -102,6 +105,5 @@
     <string name="notif_update_title">A Dodo update is ready</string>
     <string name="notif_update_body">Tap to install</string>
 
-    <string name="try_hint">Tap here, switch to Dodo, and talk</string>
-    <string name="switch_keyboard">Switch keyboard</string>
+    <string name="try_hint">Tap here and the bar appears above your keyboard</string>
 </resources>

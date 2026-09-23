@@ -47,12 +47,6 @@ object Prefs {
     fun language(c: Context): String = sp(c).getString("language", "en").orEmpty()
     fun setLanguage(c: Context, v: String) = sp(c).edit().putString("language", v).apply()
 
-    fun autoStart(c: Context): Boolean = sp(c).getBoolean("auto_start", true)
-    fun setAutoStart(c: Context, v: Boolean) = sp(c).edit().putBoolean("auto_start", v).apply()
-
-    fun autoReturn(c: Context): Boolean = sp(c).getBoolean("auto_return", false)
-    fun setAutoReturn(c: Context, v: Boolean) = sp(c).edit().putBoolean("auto_return", v).apply()
-
     /** False until the user has been walked through setup once. */
     fun onboarded(c: Context): Boolean = sp(c).getBoolean("onboarded", false)
     fun setOnboarded(c: Context) = sp(c).edit().putBoolean("onboarded", true).apply()

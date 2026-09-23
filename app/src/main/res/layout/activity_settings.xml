@@ -68,20 +68,38 @@
 
             <View android:id="@+id/setup_divider" style="@style/Hairline" />
 
-            <LinearLayout android:id="@+id/ime_row" style="@style/Row">
+            <LinearLayout android:id="@+id/bar_row" style="@style/Row">
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical">
-                    <TextView style="@style/RowTitle" android:text="@string/step_enable" />
-                    <TextView android:id="@+id/ime_state" style="@style/RowState" android:layout_marginTop="2dp" />
+                    <TextView style="@style/RowTitle" android:text="@string/step_bar" />
+                    <TextView android:id="@+id/bar_state" style="@style/RowState" android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <Button
-                    android:id="@+id/ime_action"
+                    android:id="@+id/bar_action"
                     style="@style/TextButton"
-                    android:text="@string/step_enable_action" />
+                    android:text="@string/step_bar_action" />
+            </LinearLayout>
+
+            <View android:id="@+id/record_divider" style="@style/Hairline" />
+
+            <LinearLayout android:id="@+id/record_row" style="@style/Row">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/RowTitle" android:text="@string/step_record" />
+                    <TextView android:id="@+id/record_state" style="@style/RowState" android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/record_action"
+                    style="@style/TextButton"
+                    android:text="@string/step_record_action" />
             </LinearLayout>
         </LinearLayout>
 
@@ -137,51 +155,6 @@
 
         <TextView style="@style/Hint" android:text="@string/language_hint" />
 
-        <!-- Behaviour -->
-        <TextView style="@style/SectionLabel" android:text="@string/section_behaviour" />
-
-        <LinearLayout android:id="@+id/autostart_row" style="@style/Row">
-            <TextView
-                style="@style/RowTitle"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:paddingEnd="8dp"
-                android:text="@string/opt_autostart" />
-
-            <Switch android:id="@+id/opt_autostart" style="@style/Toggle" />
-        </LinearLayout>
-
-        <View style="@style/Hairline" />
-
-        <LinearLayout android:id="@+id/autoreturn_row" style="@style/Row">
-            <TextView
-                style="@style/RowTitle"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:paddingEnd="8dp"
-                android:text="@string/opt_autoreturn" />
-
-            <Switch android:id="@+id/opt_autoreturn" style="@style/Toggle" />
-        </LinearLayout>
-
-        <!-- Updates -->
-        <TextView style="@style/SectionLabel" android:text="@string/section_updates" />
-
-        <LinearLayout style="@style/Row">
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-                <TextView android:id="@+id/update_title" style="@style/RowTitle" />
-                <TextView android:id="@+id/update_state" style="@style/RowState" android:layout_marginTop="2dp" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/update_action"
-                style="@style/TextButton" />
-        </LinearLayout>
-
         <!-- Try -->
         <TextView style="@style/SectionLabel" android:text="@string/section_try" />
 
@@ -192,12 +165,5 @@
             android:hint="@string/try_hint"
             android:inputType="textMultiLine|textCapSentences"
             android:minLines="3" />
-
-        <Button
-            android:id="@+id/switch_keyboard"
-            style="@style/TextButton"
-            android:layout_marginStart="-10dp"
-            android:layout_marginTop="4dp"
-            android:text="@string/switch_keyboard" />
     </LinearLayout>
 </ScrollView>

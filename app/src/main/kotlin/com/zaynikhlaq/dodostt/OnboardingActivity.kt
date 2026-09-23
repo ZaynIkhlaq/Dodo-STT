@@ -12,21 +12,20 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 
 /**
- * Setup as five steps rather than one long screen: welcome, microphone, keyboard list, Groq key,
- * and how to actually reach the panel. Only one step is on screen at a time, and the two steps that
+ * Setup as five steps rather than one long screen: welcome, microphone, the bar, Groq key,
+ * and how to actually use it. Only one step is on screen at a time, and the two steps that
  * depend on a system dialog advance themselves once the user comes back having done the thing.
  */
 class OnboardingActivity : Activity() {
     private companion object {
         const val WELCOME = 0
         const val MIC = 1
-        const val KEYBOARD = 2
+        const val BAR = 2
         const val KEY = 3
         const val DONE = 4
         const val MIC_REQUEST = 1
@@ -56,7 +55,7 @@ class OnboardingActivity : Activity() {
         stepViews = listOf(
             findViewById(R.id.step_welcome),
             findViewById(R.id.step_mic),
-            findViewById(R.id.step_keyboard),
+            findViewById(R.id.step_bar),
             findViewById(R.id.step_key),
             findViewById(R.id.step_done),
         )
@@ -87,11 +86,6 @@ class OnboardingActivity : Activity() {
         })
         findViewById<Button>(R.id.key_test).setOnClickListener { testKey() }
         findViewById<Button>(R.id.key_get).setOnClickListener { open("https://console.groq.com/keys") }
-        findViewById<Button>(R.id.switch_keyboard).setOnClickListener {
-            findViewById<EditText>(R.id.try_field).requestFocus()
-            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).showInputMethodPicker()
-        }
-
         render()
     }
 
@@ -107,10 +101,10 @@ class OnboardingActivity : Activity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        // Coming back from the system keyboard settings is the moment to check whether it worked.
+        // Coming back from the system settings screen is the moment to check whether it worked.
         if (hasFocus) {
             render()
-            if (armed == KEYBOARD && step == KEYBOARD && Setup.imeEnabled(this)) advanceShortly()
+            if (armed == BAR && step == BAR && barReady()) advanceShortly()
         }
     }
 
@@ -133,7 +127,7 @@ class OnboardingActivity : Activity() {
 
     private fun onPrimary() = when (step) {
         MIC -> if (Setup.hasMic(this)) goTo(step + 1) else askForMic()
-        KEYBOARD -> if (Setup.imeEnabled(this)) goTo(step + 1) else openKeyboardSettings()
+        BAR -> if (barReady()) goTo(step + 1) else openBarSettings()
         DONE -> finishOnboarding()
         else -> goTo(step + 1)
     }
@@ -168,7 +162,7 @@ class OnboardingActivity : Activity() {
         step = next
         armed = when {
             next == MIC && !Setup.hasMic(this) -> MIC
-            next == KEYBOARD && !Setup.imeEnabled(this) -> KEYBOARD
+            next == BAR && !barReady() -> BAR
             else -> -1
         }
         render()
@@ -189,14 +183,14 @@ class OnboardingActivity : Activity() {
         segments.forEachIndexed { i, seg -> seg.backgroundTintList = if (i <= step) accent else idle }
 
         val micDone = Setup.hasMic(this)
-        val imeDone = Setup.imeEnabled(this)
+        val barDone = barReady()
         findViewById<View>(R.id.mic_ok).visibility = if (micDone) View.VISIBLE else View.INVISIBLE
-        findViewById<View>(R.id.kb_ok).visibility = if (imeDone) View.VISIBLE else View.INVISIBLE
+        findViewById<View>(R.id.bar_ok).visibility = if (barDone) View.VISIBLE else View.INVISIBLE
 
         primary.text = when (step) {
             WELCOME -> getString(R.string.ob_start)
             MIC -> getString(if (micDone) R.string.ob_continue else R.string.ob_mic_action)
-            KEYBOARD -> getString(if (imeDone) R.string.ob_continue else R.string.ob_kb_action)
+            BAR -> getString(if (barDone) R.string.ob_continue else R.string.ob_bar_action)
             KEY -> getString(R.string.ob_continue)
             else -> getString(R.string.ob_done_action)
         }
@@ -207,7 +201,7 @@ class OnboardingActivity : Activity() {
         primary.isEnabled = !keyBlocked
         primary.alpha = if (keyBlocked) 0.4f else 1f
 
-        val skippable = step == MIC && !micDone || step == KEYBOARD && !imeDone || keyBlocked
+        val skippable = step == MIC && !micDone || step == BAR && !barDone || keyBlocked
         secondary.visibility = if (skippable) View.VISIBLE else View.GONE
     }
 
@@ -224,7 +218,17 @@ class OnboardingActivity : Activity() {
         }
     }
 
-    private fun openKeyboardSettings() = open(Settings.ACTION_INPUT_METHOD_SETTINGS, null)
+    /**
+     * Two switches, not one: the accessibility service puts the bar on screen, and the overlay
+     * permission is what lets Android hand it the microphone from inside someone else's app. The
+     * step asks for whichever is still missing.
+     */
+    private fun barReady() = Setup.barOn(this) && Setup.canRecordInBackground(this)
+
+    private fun openBarSettings() {
+        if (!Setup.barOn(this)) open(Settings.ACTION_ACCESSIBILITY_SETTINGS, null)
+        else open(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+    }
 
     private fun commitKey() {
         val typed = keyField.text?.toString().orEmpty()
