@@ -19,18 +19,13 @@
     <string name="notif_listening">Dodo is listening</string>
     <string name="notif_listening_body">Speech is still being transcribed with the screen off.</string>
 
-    <string name="cd_cancel">Discard recording</string>
     <string name="cd_mic">Start or stop dictation</string>
     <string name="cd_mark">Dodo</string>
-    <string name="cd_menu">Dodo settings</string>
 
 
-    <string name="pill_start">Start</string>
-    <string name="pill_stop">Done</string>
-    <string name="pill_busy">Typing</string>
 
     <!-- Onboarding -->
-    <string name="ob_welcome_body">A bar that floats above your own keyboard. Tap it in any app, speak, and what you said is typed where your cursor is.</string>
+    <string name="ob_welcome_body">A button that floats beside your own keyboard. Hold it in any app, speak, and what you said is typed where your cursor is.</string>
     <string name="ob_start">Get started</string>
     <string name="ob_continue">Continue</string>
 
@@ -40,30 +35,35 @@
     <string name="ob_mic_settings">Open app settings</string>
     <string name="ob_mic_granted">Microphone allowed</string>
 
-    <string name="ob_bar_title">Turn the bar on</string>
-    <string name="ob_bar_body">Dodo\'s bar is an accessibility service, which is the only way Android lets an app float above your keyboard and type into the field you are in. Android shows a broad warning for every one of these. Dodo looks at where your cursor is and nothing else, and sends audio nowhere but Groq.</string>
+    <string name="ob_bar_title">Turn the button on</string>
+    <string name="ob_bar_body">Dodo\'s button is an accessibility service, which is the only way Android lets an app float over your keyboard and type into the field you are in. Android shows a broad warning for every one of these. Dodo looks at where your cursor is and nothing else, and sends audio nowhere but Groq.</string>
     <string name="ob_bar_action">Open accessibility settings</string>
-    <string name="ob_bar_enabled">The bar is on</string>
+    <string name="ob_bar_enabled">The button is on</string>
 
     <string name="ob_key_title">Connect Groq</string>
     <string name="ob_key_body">Dodo transcribes with your own Groq key, so there is no account and no subscription. The free tier covers normal dictation.</string>
     <string name="ob_key_get">Get a free key</string>
 
     <string name="ob_done_title">You\'re set</string>
-    <string name="ob_done_body">Tap any text field and your keyboard comes up with Dodo\'s bar above it. Tap Start, speak, tap Done, and your words land in the field.</string>
+    <string name="ob_done_body">Tap any text field and Dodo\'s button appears at the edge of the screen. Hold it, speak, then tap it, and your words land in the field. Drag it wherever you like.</string>
     <string name="ob_done_action">Start using Dodo</string>
     <string name="ob_skip">Skip for now</string>
 
     <!-- Settings -->
     <string name="section_setup">Needs attention</string>
-    <string name="section_bar">The bar</string>
+    <string name="hint_hold">Hold to dictate</string>
+    <string name="hint_no_field">Tap a text field first</string>
+    <string name="hint_setup">Finish setting Dodo up</string>
+    <string name="hint_discarded">Thrown away</string>
+
+    <string name="section_bar">The button</string>
     <string name="bar_off">Off</string>
-    <string name="bar_off_why">Turn Dodo on under Accessibility and the bar appears above your keyboard</string>
+    <string name="bar_off_why">Turn Dodo on under Accessibility and the button appears beside your keyboard</string>
     <string name="bar_on">On</string>
-    <string name="bar_showing">Showing above your keyboard right now</string>
-    <string name="bar_waiting">Tap a text field and it appears above the keyboard</string>
+    <string name="bar_showing">On screen right now</string>
+    <string name="bar_waiting">Tap a text field and it appears at the edge of the screen</string>
     <string name="bar_stalled">Switched on, but not running — turn it off and on again under Accessibility</string>
-    <string name="bar_failed">Android refused the bar: %1$s</string>
+    <string name="bar_failed">Android refused the button: %1$s</string>
     <string name="bar_no_record">Allow \"Recording from other apps\" or dictation will hear silence</string>
 
     <string name="section_key">Groq key</string>
@@ -75,15 +75,15 @@
     <string name="step_record_action">Allow</string>
     <string name="step_record_why">Android won\'t let Dodo hear you outside its own screen</string>
 
-    <string name="a11y_summary">Floats a dictation bar above your keyboard and types what you say.</string>
-    <string name="a11y_description">Dodo uses this to place its bar above your keyboard and to type what you dictate into the field you are in. It looks at where the cursor is and nothing else, keeps no record of what you type, and sends audio only to Groq with your own key.</string>
+    <string name="a11y_summary">Floats a dictation button beside your keyboard and types what you say.</string>
+    <string name="a11y_description">Dodo uses this to place its button on the edge of your screen and to type what you dictate into the field you are in. It looks at where the cursor is and nothing else, keeps no record of what you type, and sends audio only to Groq with your own key.</string>
 
     <string name="step_mic">Microphone</string>
     <string name="step_mic_action">Allow</string>
-    <string name="step_bar">The Dodo bar</string>
+    <string name="step_bar">The Dodo button</string>
     <string name="step_bar_action">Open</string>
     <string name="step_mic_why">Dodo can\'t record without it</string>
-    <string name="step_bar_why">The bar won\'t appear above your keyboard</string>
+    <string name="step_bar_why">The button won\'t appear beside your keyboard</string>
 
     <string name="key_hint">gsk_…</string>
     <string name="key_test">Test</string>
@@ -115,5 +115,5 @@
     <string name="notif_update_title">A Dodo update is ready</string>
     <string name="notif_update_body">Tap to install</string>
 
-    <string name="try_hint">Tap here and the bar appears above your keyboard</string>
+    <string name="try_hint">Tap here and the button appears at the edge of the screen</string>
 </resources>

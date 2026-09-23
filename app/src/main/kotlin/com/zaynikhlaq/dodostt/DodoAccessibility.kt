@@ -10,52 +10,60 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityWindowInfo
 import android.widget.TextView
+import kotlin.math.abs
 
 /**
- * Dodo as a bar rather than a keyboard: your own keyboard stays, and dictation floats just above it.
- *
- * Android runs one input method at a time and gives no way to add anything to somebody else's
- * keyboard, so the only place a bar can live is a window of its own. An accessibility service is what
- * makes that work: its overlay window is layered above the keyboard — an ordinary "draw over other
- * apps" window is layered *below* it — and it is also the only way to put text into a field this app
- * doesn't own.
- *
- * The service watches for a focused editable field, parks the bar over the top edge of the keyboard,
- * and types what you said into whatever has the cursor.
- */
-/**
  * What the bar is doing, for the settings screen to report. A phone has no logcat, so without this
- * a bar that never appears gives the user nothing to go on.
+ * a button that never appears gives the user nothing to go on.
  */
 object BarStatus {
     /** The service is switched on and running. */
     @Volatile var connected = false
-    /** The bar is on screen right now. */
+    /** The button is on screen right now. */
     @Volatile var showing = false
-    /** A keyboard was visible the last time the bar looked. */
+    /** A keyboard was visible the last time the button looked. */
     @Volatile var keyboardSeen = false
     /** Why the window wouldn't go up, if it wouldn't. */
     @Volatile var lastError: String? = null
 }
 
+/**
+ * Dodo as a button on the edge of the screen: your own keyboard stays exactly as it is, and
+ * dictation is one disc parked against the side, out of the way of the keys.
+ *
+ * Android runs one input method at a time and gives no way to add anything to somebody else's
+ * keyboard, so the only place Dodo can live is a window of its own. An accessibility service is what
+ * makes that work: its overlay window is layered above the keyboard — an ordinary "draw over other
+ * apps" window is layered *below* it — and it is also the only way to put text into a field this app
+ * doesn't own.
+ *
+ * Starting a dictation is deliberate: hold the button, or double-tap it. A single tap can't start
+ * one, because a button that lives under your thumb would otherwise record every time you brushed
+ * it. Once it is recording, a single tap finishes and types; holding throws the recording away.
+ */
 class DodoAccessibility : AccessibilityService(), Dictation.Sink {
 
     private companion object {
-        /** Events arrive in bursts; settle before measuring anything. */
+        /** Events arrive in bursts — a focus change is three or four — so measure once they settle. */
         const val SETTLE_MS = 50L
-        /** The gap between the bar and the top of the keyboard. */
-        const val LIFT_DP = 8f
-        /** Where the bar sits when there is no keyboard on screen. */
-        const val FLOOR_DP = 96f
+        /** Hold this long to start dictating. */
+        const val HOLD_MS = 450L
+        /** Two taps inside this also start one. */
+        const val DOUBLE_TAP_MS = 320L
+        /** How long a word of help stays up. */
+        const val HINT_MS = 1900L
     }
 
     private val handler = Handler(Looper.getMainLooper())
@@ -63,19 +71,25 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     private lateinit var wm: WindowManager
     private lateinit var params: WindowManager.LayoutParams
 
-    private var bar: View? = null
-    private var pill: StartPillView? = null
-    private var status: TextView? = null
-    private var cancel: View? = null
+    private var root: View? = null
+    private var orb: OrbView? = null
+    private var hint: TextView? = null
     private var attachedToWindow = false
 
     /** Text with nowhere to go, waiting for a tap to place it. */
     private var pendingInsert: String? = null
-    private var message: String? = null
-    /** The second the clock is showing, so the status line is only rewritten when it changes. */
     private var shownSeconds = -1L
 
     private val bounds = Rect()
+    private val slop by lazy { ViewConfiguration.get(this).scaledTouchSlop }
+
+    // --- the finger on the button ---
+    private var downX = 0f
+    private var downY = 0f
+    private var startY = 0
+    private var dragging = false
+    private var held = false
+    private var lastTapAt = 0L
 
     override fun onServiceConnected() {
         super.onServiceConnected()
@@ -85,24 +99,24 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
-            // Not focusable, so the field you are typing in keeps the cursor and the keyboard stays up.
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            // Not focusable and not touch-modal: the field you are typing in keeps the cursor, and
+            // everything outside the button itself goes to the app underneath.
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT,
         ).apply {
-            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+            gravity = Gravity.TOP or side()
+            y = Prefs.orbY(this@DodoAccessibility, defaultY())
         }
-        buildBar()
+        build()
         BarStatus.connected = true
         BarStatus.lastError = null
         Updater.schedule(this)
     }
 
-    override fun onAccessibilityEvent(event: AccessibilityEvent?) = scheduleReposition()
-
-    /** Events arrive in bursts — a focus change is three or four — so measure once they settle. */
-    private fun scheduleReposition() {
-        handler.removeCallbacks(reposition)
-        handler.postDelayed(reposition, SETTLE_MS)
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        handler.removeCallbacks(refresh)
+        handler.postDelayed(refresh, SETTLE_MS)
     }
 
     override fun onInterrupt() = Unit
@@ -115,54 +129,125 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         return super.onUnbind(intent)
     }
 
-    // --- the bar ---------------------------------------------------------------------------------
+    // --- the button ------------------------------------------------------------------------------
 
-    private fun buildBar() {
-        val view = LayoutInflater.from(this).inflate(R.layout.floating_bar, null)
-        pill = view.findViewById(R.id.pill)
-        status = view.findViewById(R.id.status)
-        cancel = view.findViewById(R.id.btn_cancel)
-
-        pill?.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            onPillTapped()
-        }
-        cancel?.setOnClickListener {
-            it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
-            message = null
-            dictation.discard()
-            render()
-        }
-        status?.setOnClickListener {
-            val held = pendingInsert
-            when {
-                held != null -> {
-                    if (insert(held)) pendingInsert = null
-                    message = null
-                    render()
-                }
-                !Setup.hasKey(this) || !Setup.hasMic(this) -> openSettings()
-            }
-        }
-        view.findViewById<View>(R.id.btn_menu).setOnClickListener { openSettings() }
-        bar = view
+    private fun build() {
+        val view = LayoutInflater.from(this).inflate(R.layout.floating_orb, null)
+        orb = view.findViewById(R.id.orb)
+        hint = view.findViewById(R.id.hint)
+        orb?.setOnTouchListener { _, event -> onOrbTouch(event) }
+        root = view
+        faceHint(Prefs.orbOnLeft(this))
         render()
     }
 
-    private fun onPillTapped() {
-        message = null
-        when (dictation.state) {
-            Dictation.State.IDLE -> {
-                if (!Setup.hasKey(this) || !Setup.hasMic(this) || !Setup.canRecordInBackground(this)) {
-                    return openSettings()
-                }
-                shownSeconds = -1L
-                if (!dictation.start()) message = getString(R.string.status_mic_busy)
-                Updater.maybeCheck(this)
+    private fun side() = if (Prefs.orbOnLeft(this)) Gravity.START else Gravity.END
+
+    private fun defaultY() = (screenHeight() * 0.55f).toInt()
+
+    /** Tap, hold, double-tap and drag, all off one button. */
+    private fun onOrbTouch(event: MotionEvent): Boolean {
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                downX = event.rawX
+                downY = event.rawY
+                startY = params.y
+                dragging = false
+                held = false
+                handler.postDelayed(hold, HOLD_MS)
             }
-            Dictation.State.RECORDING -> dictation.stop()
+            MotionEvent.ACTION_MOVE -> {
+                if (!dragging && (abs(event.rawX - downX) > slop || abs(event.rawY - downY) > slop)) {
+                    dragging = true
+                    handler.removeCallbacks(hold)
+                }
+                if (dragging) {
+                    params.y = (startY + (event.rawY - downY)).toInt()
+                        .coerceIn(0, screenHeight() - (root?.height ?: 0))
+                    runCatching { wm.updateViewLayout(root, params) }
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                handler.removeCallbacks(hold)
+                when {
+                    dragging -> settle(event.rawX)
+                    !held -> onTap()
+                }
+            }
+            MotionEvent.ACTION_CANCEL -> handler.removeCallbacks(hold)
+        }
+        return true
+    }
+
+    /** Dropped after a drag: snap to whichever edge is nearer, and remember it for next time. */
+    private fun settle(x: Float) {
+        val onLeft = x < screenWidth() / 2f
+        Prefs.setOrbPosition(this, onLeft, params.y)
+        params.gravity = Gravity.TOP or (if (onLeft) Gravity.START else Gravity.END)
+        faceHint(onLeft)
+        runCatching { wm.updateViewLayout(root, params) }
+    }
+
+    /** The label hangs off the side the button isn't on, so it never runs off the screen. */
+    private fun faceHint(onLeft: Boolean) {
+        root?.layoutDirection = if (onLeft) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR
+    }
+
+    private val hold = Runnable {
+        held = true
+        when (dictation.state) {
+            Dictation.State.IDLE -> start()
+            // Holding a running dictation is how you throw it away.
+            Dictation.State.RECORDING -> {
+                orb?.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                dictation.discard()
+                say(getString(R.string.hint_discarded))
+                render()
+            }
             Dictation.State.TRANSCRIBING -> Unit
         }
+    }
+
+    private fun onTap() {
+        when (dictation.state) {
+            Dictation.State.RECORDING -> {
+                orb?.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                dictation.stop()
+                render()
+            }
+            Dictation.State.TRANSCRIBING -> Unit
+            Dictation.State.IDLE -> {
+                val held = pendingInsert
+                val now = SystemClock.uptimeMillis()
+                when {
+                    // Text that had nowhere to go: the next tap places it.
+                    held != null -> {
+                        if (insert(held)) pendingInsert = null
+                        render()
+                    }
+                    now - lastTapAt < DOUBLE_TAP_MS -> {
+                        lastTapAt = 0L
+                        start()
+                    }
+                    else -> {
+                        lastTapAt = now
+                        say(getString(R.string.hint_hold))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun start() {
+        if (!Setup.hasKey(this) || !Setup.hasMic(this) || !Setup.canRecordInBackground(this)) {
+            say(getString(R.string.hint_setup))
+            return openSettings()
+        }
+        // Dictating into nothing would strand every word on the clipboard; say so instead.
+        if (focusedEditable() == null) return say(getString(R.string.hint_no_field))
+        orb?.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        shownSeconds = -1L
+        if (!dictation.start()) say(getString(R.string.status_mic_busy))
         render()
     }
 
@@ -170,25 +255,33 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         startActivity(Intent(this, SettingsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
 
-    /** Shows the bar where it belongs, or takes it away when there is nothing to dictate into. */
-    private val reposition = Runnable {
+    /** A word beside the button, gone again in a moment. */
+    private fun say(text: String) {
+        val label = hint ?: return
+        label.text = text
+        label.visibility = View.VISIBLE
+        handler.removeCallbacks(clearHint)
+        handler.postDelayed(clearHint, HINT_MS)
+    }
+
+    private val clearHint = Runnable {
+        if (dictation.state != Dictation.State.RECORDING) hint?.visibility = View.GONE
+    }
+
+    /** Shows the button where it belongs, or takes it away when there is nothing to dictate into. */
+    private val refresh = Runnable {
         val live = dictation.state != Dictation.State.IDLE
         val keyboardTop = keyboardTop()
         BarStatus.keyboardSeen = keyboardTop > 0
-        // A keyboard on screen is enough: some apps never report a focused node, and hiding the bar
-        // in those is worse than showing one that has nowhere to type — it would insert by clipboard.
+        // A keyboard on screen is enough: some apps never report a focused node, and hiding the
+        // button in those is worse than showing one that can't start.
         val wanted = live || pendingInsert != null || keyboardTop > 0 || focusedEditable() != null
-        if (!wanted) return@Runnable hide()
-        params.y = if (keyboardTop > 0) (screenHeight() - keyboardTop + dp(LIFT_DP)).toInt() else dp(FLOOR_DP).toInt()
-        show()
+        if (wanted) show() else hide()
     }
 
     private fun show() {
-        val view = bar ?: return
-        if (attachedToWindow) {
-            runCatching { wm.updateViewLayout(view, params) }
-            return
-        }
+        val view = root ?: return
+        if (attachedToWindow) return
         runCatching { wm.addView(view, params) }
             .onSuccess {
                 attachedToWindow = true
@@ -199,18 +292,20 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     }
 
     private fun hide() {
-        val view = bar ?: return
+        val view = root ?: return
         if (!attachedToWindow) return
         attachedToWindow = false
         BarStatus.showing = false
         runCatching { wm.removeView(view) }
     }
 
-    private fun dp(value: Float) = value * resources.displayMetrics.density
-
     private fun screenHeight(): Int =
         if (Build.VERSION.SDK_INT >= 30) wm.currentWindowMetrics.bounds.height()
         else resources.displayMetrics.heightPixels
+
+    private fun screenWidth(): Int =
+        if (Build.VERSION.SDK_INT >= 30) wm.currentWindowMetrics.bounds.width()
+        else resources.displayMetrics.widthPixels
 
     /** The top edge of the keyboard's own window, or 0 when no keyboard is up. */
     private fun keyboardTop(): Int {
@@ -222,28 +317,20 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
 
     private fun render() {
         val state = dictation.state
-        pill?.mode = when (state) {
-            Dictation.State.IDLE -> StartPillView.Mode.IDLE
-            Dictation.State.RECORDING -> StartPillView.Mode.RECORDING
-            Dictation.State.TRANSCRIBING -> StartPillView.Mode.BUSY
+        orb?.mode = when (state) {
+            Dictation.State.IDLE -> OrbView.Mode.IDLE
+            Dictation.State.RECORDING -> OrbView.Mode.RECORDING
+            Dictation.State.TRANSCRIBING -> OrbView.Mode.BUSY
         }
-        cancel?.visibility = if (state == Dictation.State.RECORDING) View.VISIBLE else View.GONE
-
         val held = pendingInsert
-        val text = when {
-            message != null -> message
-            held != null -> getString(R.string.status_pending, held.split(' ').size)
-            state == Dictation.State.RECORDING -> {
-                val seconds = dictation.elapsedMs / 1000
-                getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
-            }
-            !Setup.hasMic(this) || !Setup.canRecordInBackground(this) -> getString(R.string.status_no_mic)
-            !Setup.hasKey(this) -> getString(R.string.status_no_key)
-            else -> null
+        when {
+            state == Dictation.State.RECORDING -> Unit // the clock takes the label over
+            held != null -> say(getString(R.string.status_pending, held.split(' ').size))
+            else -> handler.post(clearHint)
         }
-        status?.text = text
-        status?.visibility = if (text.isNullOrEmpty()) View.GONE else View.VISIBLE
         Updater.setDictating(this, state != Dictation.State.IDLE)
+        handler.removeCallbacks(refresh)
+        handler.post(refresh)
     }
 
     // --- putting text in the field ---------------------------------------------------------------
@@ -311,18 +398,16 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
 
     // --- Dictation.Sink --------------------------------------------------------------------------
 
-    override fun onState(state: Dictation.State) {
-        render()
-        scheduleReposition()
-    }
+    override fun onState(state: Dictation.State) = render()
 
     override fun onLevel(level: Float) {
-        pill?.setLevel(level)
-        // Sixty times a second is far too often to rebuild the bar; only the clock moves.
+        orb?.setLevel(level)
+        // Sixty times a second is far too often to touch the label; only the clock moves.
         val seconds = dictation.elapsedMs / 1000
-        if (seconds != shownSeconds && message == null && pendingInsert == null) {
+        if (seconds != shownSeconds) {
             shownSeconds = seconds
-            status?.text = getString(R.string.status_listening, "%d:%02d".format(seconds / 60, seconds % 60))
+            hint?.text = "%d:%02d".format(seconds / 60, seconds % 60)
+            hint?.visibility = View.VISIBLE
         }
     }
 
@@ -333,7 +418,8 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
             pendingInsert = stranded
             copyToClipboard(stranded)
         }
-        message = error ?: if (delivered == 0 && stranded == null) getString(R.string.status_silence) else null
+        val message = error ?: if (delivered == 0 && stranded == null) getString(R.string.status_silence) else null
+        message?.let(::say)
         render()
     }
 }

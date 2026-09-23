@@ -24,11 +24,7 @@
     <color name="switch_track_on">#663D5AFE</color>
     <color name="switch_track_off">#DAD6CE</color>
 
-    <!-- The floating bar: a pale slab over whatever app you are in, and the pill inside it. -->
-    <color name="float_bg">#FFFFFF</color>
-    <color name="bar_pill">#1C1C1E</color>
-    <color name="bar_on_pill">#FFFFFF</color>
-    <color name="bar_muted">#6E6E73</color>
-    <color name="bar_cancel">#ECECEF</color>
-    <color name="bar_on_cancel">#1C1C1E</color>
+    <!-- The button, and the little label beside it. -->
+    <color name="orb_bg">#FFFFFF</color>
+    <color name="orb_ink">#1C1C1E</color>
 </resources>

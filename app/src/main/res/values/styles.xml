@@ -121,13 +121,6 @@
         <item name="android:textColorHint">@color/text_tertiary</item>
     </style>
 
-    <style name="PanelKey">
-        <item name="android:layout_width">48dp</item>
-        <item name="android:layout_height">48dp</item>
-        <item name="android:background">@drawable/bg_panel_key</item>
-        <item name="android:padding">12dp</item>
-        <item name="android:tint">@color/text_secondary</item>
-    </style>
 
     <style name="Toggle">
         <item name="android:layout_width">wrap_content</item>

@@ -47,6 +47,14 @@ object Prefs {
     fun language(c: Context): String = sp(c).getString("language", "en").orEmpty()
     fun setLanguage(c: Context, v: String) = sp(c).edit().putString("language", v).apply()
 
+    /** Where the button sits: which edge, and how far down in pixels. */
+    fun orbOnLeft(c: Context): Boolean = sp(c).getBoolean("orb_left", false)
+
+    fun orbY(c: Context, fallback: Int): Int = sp(c).getInt("orb_y", fallback)
+
+    fun setOrbPosition(c: Context, onLeft: Boolean, y: Int) =
+        sp(c).edit().putBoolean("orb_left", onLeft).putInt("orb_y", y).apply()
+
     /** False until the user has been walked through setup once. */
     fun onboarded(c: Context): Boolean = sp(c).getBoolean("onboarded", false)
     fun setOnboarded(c: Context) = sp(c).edit().putBoolean("onboarded", true).apply()

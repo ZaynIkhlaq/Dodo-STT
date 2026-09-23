@@ -21,11 +21,7 @@
     <color name="switch_track_on">#666B85FF</color>
     <color name="switch_track_off">#3A3A42</color>
 
-    <!-- The floating bar in the dark: a charcoal slab, the pill inverted. -->
-    <color name="float_bg">#232326</color>
-    <color name="bar_pill">#F2F2F2</color>
-    <color name="bar_on_pill">#000000</color>
-    <color name="bar_muted">#A0A0A5</color>
-    <color name="bar_cancel">#3A3A3C</color>
-    <color name="bar_on_cancel">#F2F2F2</color>
+    <!-- The button in the dark. -->
+    <color name="orb_bg">#26262A</color>
+    <color name="orb_ink">#F2F2F2</color>
 </resources>
