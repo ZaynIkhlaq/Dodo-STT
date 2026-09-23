@@ -16,6 +16,7 @@ import android.os.Looper
 import android.os.SystemClock
 import org.json.JSONObject
 import java.io.File
+import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.Executors
@@ -42,6 +43,8 @@ object Updater {
     private const val MIN_GAP_MS = 15 * 60 * 1000L
     /** Hopping between fields makes the bar come and go; wait this long before trusting it is idle. */
     private const val SETTLE_MS = 10_000L
+    /** A flaky connection gets this many goes before the check gives up until the next one. */
+    private const val ATTEMPTS = 4
     private const val CHANNEL = "updates"
     private const val NOTIFICATION_ID = 2
     const val ACTION_STATUS = "com.zaynikhlaq.dodostt.INSTALL_STATUS"
@@ -92,7 +95,7 @@ object Updater {
         }
     }
 
-    /** For the keyboard opening: checks unless one ran recently. */
+    /** For the button appearing: checks unless one ran recently. */
     fun maybeCheck(c: Context) {
         if (lastCheckAt != 0L && SystemClock.elapsedRealtime() - lastCheckAt < MIN_GAP_MS) return
         checkNow(c)
@@ -195,19 +198,50 @@ object Updater {
         }
     }
 
+    /**
+     * Downloads in a way that survives a connection dying part-way, which on some networks is most
+     * of them: the bytes land in a .part file and every retry asks for the range that is still
+     * missing, so a stall near the end costs seconds rather than the whole transfer.
+     */
     private fun download(url: String, target: File) {
         val partial = File(target.path + ".part")
-        val conn = open(url).apply { setRequestProperty("Accept", "application/octet-stream") }
-        try {
-            if (conn.responseCode !in 200..299) error("GitHub error ${conn.responseCode}")
-            conn.inputStream.use { input -> partial.outputStream().use { input.copyTo(it) } }
-        } finally {
+        var lastProblem: String? = null
+
+        repeat(ATTEMPTS) { attempt ->
+            val have = if (partial.exists()) partial.length() else 0L
+            val conn = open(url).apply {
+                setRequestProperty("Accept", "application/octet-stream")
+                if (have > 0) setRequestProperty("Range", "bytes=$have-")
+                readTimeout = 60_000
+            }
+            val expected = runCatching {
+                val code = conn.responseCode
+                if (code !in 200..299) error("GitHub error $code")
+                // 206 continues where we left off; a plain 200 means the server ignored the range.
+                val resuming = code == HttpURLConnection.HTTP_PARTIAL
+                if (!resuming && have > 0) partial.delete()
+                val alreadyHave = if (resuming) have else 0L
+                FileOutputStream(partial, resuming).use { out ->
+                    conn.inputStream.use { it.copyTo(out) }
+                }
+                alreadyHave + conn.contentLengthLong
+            }
             conn.disconnect()
+
+            expected.onSuccess { total ->
+                // A connection cut short ends the copy without an error, so measure rather than trust.
+                if (total <= 0 || partial.length() >= total) {
+                    if (partial.renameTo(target)) return
+                    partial.delete()
+                    error("Couldn't save the update")
+                }
+                lastProblem = "The download stopped early"
+            }.onFailure { lastProblem = it.message ?: it.javaClass.simpleName }
+
+            if (attempt < ATTEMPTS - 1) Thread.sleep(1500L * (attempt + 1))
         }
-        if (!partial.renameTo(target)) {
-            partial.delete()
-            error("Couldn't save the update")
-        }
+        partial.delete()
+        error(lastProblem ?: "The download wouldn't finish")
     }
 
     private fun installIfIdle(c: Context) {
