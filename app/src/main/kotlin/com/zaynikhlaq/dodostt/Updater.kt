@@ -336,7 +336,7 @@ object Updater {
             manager.notify(
                 NOTIFICATION_ID,
                 Notification.Builder(c, CHANNEL)
-                    .setSmallIcon(R.drawable.ic_dodo)
+                    .setSmallIcon(R.drawable.ic_vodo)
                     .setContentTitle(c.getString(R.string.notif_update_title))
                     .setContentText(c.getString(R.string.notif_update_body))
                     .setContentIntent(tap)

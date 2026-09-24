@@ -43,7 +43,8 @@ object Setup {
     fun accessibilityIntent(c: Context): Intent {
         val component = ComponentName(c, DodoAccessibility::class.java).flattenToString()
         if (Build.VERSION.SDK_INT >= 31) {
-            val direct = Intent(Settings.ACTION_ACCESSIBILITY_DETAILS_SETTINGS)
+            // Not in the SDK's constants, but it is the documented action and Samsung honours it.
+            val direct = Intent("android.settings.ACCESSIBILITY_DETAILS_SETTINGS")
                 .putExtra(Intent.EXTRA_COMPONENT_NAME, component)
             if (direct.resolveActivity(c.packageManager) != null) return direct
         }
