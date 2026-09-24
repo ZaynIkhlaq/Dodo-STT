@@ -25,21 +25,21 @@
     <string name="ob_continue">Continue</string>
 
     <string name="ob_mic_title">Let Vodo hear you</string>
-    <string name="ob_mic_body">Vodo records only while the panel says Listening. The clip is deleted from your phone the moment it comes back as text, and it is never sent anywhere but Groq.</string>
+    <string name="ob_mic_body">Vodo records only while you are holding the button. The clip is deleted the moment it comes back as text, and goes nowhere but Groq.</string>
     <string name="ob_mic_action">Allow microphone</string>
     <string name="ob_mic_settings">Open app settings</string>
     <string name="ob_mic_granted">Microphone allowed</string>
 
     <string name="ob_bar_title">Turn the button on</string>
-    <string name="ob_bar_body">Vodo\'s button is an accessibility service, which is the only way Android lets an app float over your keyboard and type into the field you are in. Android shows a broad warning for every one of these. Vodo looks at where your cursor is and nothing else, and sends audio nowhere but Groq.</string>
+    <string name="ob_bar_body">An accessibility service is the only way Android lets an app float over your keyboard and type into the field you are in, so Android shows a broad warning for all of them. Vodo looks at where your cursor is, and nothing else.</string>
     <string name="ob_bar_action">Open accessibility settings</string>
     <string name="ob_bar_enabled">The button is on</string>
-    <string name="ob_bar_path">Accessibility → Installed apps → Vodo. If the switch is greyed out, open Apps → Vodo → ⋮ → Allow restricted settings first.</string>
+    <string name="ob_bar_path">The button below opens Vodo\'s own page. If the switch there is greyed out, go to Apps → Vodo → ⋮ → Allow restricted settings, then come back.</string>
     <string name="ob_record_allowed">Recording from other apps is allowed</string>
     <string name="ob_record_action">Allow appear on top</string>
 
     <string name="ob_key_title">Connect Groq</string>
-    <string name="ob_key_body">Vodo transcribes with your own Groq key, so there is no account and no subscription. The free tier covers normal dictation.</string>
+    <string name="ob_key_body">Vodo transcribes with your own Groq key: no account, no subscription. The free tier covers normal dictation.</string>
     <string name="ob_key_get">Get a free key</string>
 
     <string name="ob_done_title">You\'re set</string>
