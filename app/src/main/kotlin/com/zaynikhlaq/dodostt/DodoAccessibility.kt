@@ -152,7 +152,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     private fun onOrbTouch(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                tab?.pressed = true
+                tab?.sunk = true
                 downX = event.rawX
                 downY = event.rawY
                 startY = params.y
@@ -182,7 +182,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
                 }
             }
             MotionEvent.ACTION_UP -> {
-                tab?.pressed = false
+                tab?.sunk = false
                 handler.removeCallbacks(hold)
                 when {
                     pushing -> release()
@@ -191,7 +191,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
                 }
             }
             MotionEvent.ACTION_CANCEL -> {
-                tab?.pressed = false
+                tab?.sunk = false
                 handler.removeCallbacks(hold)
                 if (pushing) release()
             }

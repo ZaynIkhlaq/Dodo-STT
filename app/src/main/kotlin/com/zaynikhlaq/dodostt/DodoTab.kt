@@ -103,7 +103,7 @@ class DodoTab @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
         }
 
     /** A finger is on it: the tile sinks a little, the way a physical key would. */
-    var pressed = false
+    var sunk = false
         set(value) {
             if (field == value) return
             field = value
