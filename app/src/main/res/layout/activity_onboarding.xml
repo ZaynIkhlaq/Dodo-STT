@@ -46,7 +46,7 @@
                 android:layout_width="104dp"
                 android:layout_height="104dp"
                 android:contentDescription="@string/cd_mark"
-                android:src="@drawable/ic_dodo"
+                android:src="@drawable/ic_vodo"
                 android:tint="@color/text_primary" />
 
             <TextView

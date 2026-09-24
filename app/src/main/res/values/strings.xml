@@ -1,26 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Dodo STT</string>
-    <string name="brand">Dodo</string>
+    <string name="app_name">Vodo</string>
+    <string name="brand">Vodo</string>
     <string name="tagline">Speak. It types.</string>
     <string name="subtype_voice">Voice</string>
 
     <!-- IME panel -->
-    <string name="status_idle"></string>
-    <string name="status_listening">Listening · %1$s</string>
-    <string name="status_transcribing"></string>
-    <string name="status_no_key">Add your Groq key — open Dodo</string>
-    <string name="status_no_mic">We can\'t hear you — open Dodo</string>
     <string name="status_silence">We didn\'t catch that</string>
     <string name="status_mic_busy">Another app is using the microphone</string>
     <string name="status_pending">Tap to insert %1$d words</string>
 
     <string name="channel_dictation">Dictation</string>
-    <string name="notif_listening">Dodo is listening</string>
+    <string name="notif_listening">Vodo is listening</string>
     <string name="notif_listening_body">Speech is still being transcribed with the screen off.</string>
 
     <string name="cd_mic">Start or stop dictation</string>
-    <string name="cd_mark">Dodo</string>
+    <string name="cd_mark">Vodo</string>
 
 
 
@@ -29,28 +24,28 @@
     <string name="ob_start">Get started</string>
     <string name="ob_continue">Continue</string>
 
-    <string name="ob_mic_title">Let Dodo hear you</string>
-    <string name="ob_mic_body">Dodo records only while the panel says Listening. The clip is deleted from your phone the moment it comes back as text, and it is never sent anywhere but Groq.</string>
+    <string name="ob_mic_title">Let Vodo hear you</string>
+    <string name="ob_mic_body">Vodo records only while the panel says Listening. The clip is deleted from your phone the moment it comes back as text, and it is never sent anywhere but Groq.</string>
     <string name="ob_mic_action">Allow microphone</string>
     <string name="ob_mic_settings">Open app settings</string>
     <string name="ob_mic_granted">Microphone allowed</string>
 
     <string name="ob_bar_title">Turn the button on</string>
-    <string name="ob_bar_body">Dodo\'s button is an accessibility service, which is the only way Android lets an app float over your keyboard and type into the field you are in. Android shows a broad warning for every one of these. Dodo looks at where your cursor is and nothing else, and sends audio nowhere but Groq.</string>
+    <string name="ob_bar_body">Vodo\'s button is an accessibility service, which is the only way Android lets an app float over your keyboard and type into the field you are in. Android shows a broad warning for every one of these. Vodo looks at where your cursor is and nothing else, and sends audio nowhere but Groq.</string>
     <string name="ob_bar_action">Open accessibility settings</string>
     <string name="ob_bar_enabled">The button is on</string>
-    <string name="ob_bar_path">Accessibility → Installed apps → Dodo STT. If the switch is greyed out, open Apps → Dodo STT → ⋮ → Allow restricted settings first.</string>
+    <string name="ob_bar_path">Accessibility → Installed apps → Vodo. If the switch is greyed out, open Apps → Vodo → ⋮ → Allow restricted settings first.</string>
     <string name="ob_record_allowed">Recording from other apps is allowed</string>
     <string name="ob_record_action">Allow appear on top</string>
 
     <string name="ob_key_title">Connect Groq</string>
-    <string name="ob_key_body">Dodo transcribes with your own Groq key, so there is no account and no subscription. The free tier covers normal dictation.</string>
+    <string name="ob_key_body">Vodo transcribes with your own Groq key, so there is no account and no subscription. The free tier covers normal dictation.</string>
     <string name="ob_key_get">Get a free key</string>
 
     <string name="ob_done_title">You\'re set</string>
-    <string name="ob_done_body">Tap any text field and Dodo\'s button appears at the edge of the screen. Hold it, speak, then tap it, and your words land in the field. Drag it wherever you like.</string>
+    <string name="ob_done_body">Tap any text field and Vodo\'s button appears at the edge of the screen. Hold it, speak, then tap it, and your words land in the field. Drag it wherever you like.</string>
     <string name="ob_done_gestures">Hold the button and talk. Let go and it types.\n\nDouble-tap to lock it listening, hands free. Tap once to finish.\n\nDrag it anywhere along either edge.</string>
-    <string name="ob_done_action">Start using Dodo</string>
+    <string name="ob_done_action">Start using Vodo</string>
     <string name="ob_skip">Skip for now</string>
 
     <!-- Settings -->
@@ -66,7 +61,7 @@
 
     <string name="section_bar">The button</string>
     <string name="bar_off">Off</string>
-    <string name="bar_off_why">Turn Dodo on under Accessibility and the button appears beside your keyboard</string>
+    <string name="bar_off_why">Turn Vodo on under Accessibility and the button appears beside your keyboard</string>
     <string name="bar_on">On</string>
     <string name="bar_showing">On screen right now</string>
     <string name="bar_waiting">Tap a text field and it appears at the edge of the screen</string>
@@ -81,16 +76,16 @@
 
     <string name="step_record">Recording from other apps</string>
     <string name="step_record_action">Allow</string>
-    <string name="step_record_why">Android won\'t let Dodo hear you outside its own screen</string>
+    <string name="step_record_why">Android won\'t let Vodo hear you outside its own screen</string>
 
     <string name="a11y_summary">Floats a dictation button beside your keyboard and types what you say.</string>
-    <string name="a11y_description">Dodo uses this to place its button on the edge of your screen and to type what you dictate into the field you are in. It looks at where the cursor is and nothing else, keeps no record of what you type, and sends audio only to Groq with your own key.</string>
+    <string name="a11y_description">Vodo uses this to place its button on the edge of your screen and to type what you dictate into the field you are in. It looks at where the cursor is and nothing else, keeps no record of what you type, and sends audio only to Groq with your own key.</string>
 
     <string name="step_mic">Microphone</string>
     <string name="step_mic_action">Allow</string>
-    <string name="step_bar">The Dodo button</string>
+    <string name="step_bar">The Vodo button</string>
     <string name="step_bar_action">Open</string>
-    <string name="step_mic_why">Dodo can\'t record without it</string>
+    <string name="step_mic_why">Vodo can\'t record without it</string>
     <string name="step_bar_why">The button won\'t appear beside your keyboard</string>
 
     <string name="key_hint">gsk_…</string>
@@ -109,9 +104,13 @@
     <string name="language_hint">English stops accented English being read as another language. Automatic handles anything Whisper supports.</string>
 
 
+    <string name="step_battery">Battery</string>
+    <string name="step_battery_action">Allow</string>
+    <string name="step_battery_why">Samsung will suspend Vodo and the button will stop appearing</string>
+
     <string name="section_updates">Updates</string>
     <string name="update_version">Version %1$s</string>
-    <string name="update_needs_permission">Allow Dodo to install its own updates and they happen by themselves</string>
+    <string name="update_needs_permission">Allow Vodo to install its own updates and they happen by themselves</string>
     <string name="update_allow">Allow</string>
     <string name="update_check">Check</string>
     <string name="update_checking">Checking…</string>
@@ -120,7 +119,7 @@
     <string name="update_waiting">1.0.%1$d is downloaded and installs when the keyboard closes</string>
     <string name="update_failed">Couldn\'t update: %1$s</string>
     <string name="channel_updates">Updates</string>
-    <string name="notif_update_title">A Dodo update is ready</string>
+    <string name="notif_update_title">A Vodo update is ready</string>
     <string name="notif_update_body">Tap to install</string>
 
     <string name="try_hint">Tap here and the button appears at the edge of the screen</string>

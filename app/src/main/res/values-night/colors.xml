@@ -24,4 +24,5 @@
     <!-- The docked tile in the dark. -->
     <color name="tab_bg">#2A2A2E</color>
     <color name="tab_ink">#F2F2F2</color>
+    <color name="tab_muted">#9A9AA0</color>
 </resources>

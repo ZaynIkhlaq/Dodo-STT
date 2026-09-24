@@ -27,4 +27,5 @@
     <!-- The docked tile: a neutral slab that sits back until it has something to say. -->
     <color name="tab_bg">#F4F4F6</color>
     <color name="tab_ink">#1C1C1E</color>
+    <color name="tab_muted">#6E6E73</color>
 </resources>

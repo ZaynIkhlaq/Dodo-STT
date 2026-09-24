@@ -25,7 +25,7 @@
             android:layout_width="44dp"
             android:layout_height="44dp"
             android:contentDescription="@string/cd_mark"
-            android:src="@drawable/ic_dodo"
+            android:src="@drawable/ic_vodo"
             android:tint="@color/text_primary" />
 
         <TextView
@@ -100,6 +100,24 @@
                     android:id="@+id/record_action"
                     style="@style/TextButton"
                     android:text="@string/step_record_action" />
+            </LinearLayout>
+
+            <View android:id="@+id/battery_divider" style="@style/Hairline" />
+
+            <LinearLayout android:id="@+id/battery_row" style="@style/Row">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView style="@style/RowTitle" android:text="@string/step_battery" />
+                    <TextView android:id="@+id/battery_state" style="@style/RowState" android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/battery_action"
+                    style="@style/TextButton"
+                    android:text="@string/step_battery_action" />
             </LinearLayout>
         </LinearLayout>
 

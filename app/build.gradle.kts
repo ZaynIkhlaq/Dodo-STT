@@ -13,6 +13,9 @@ android {
     compileSdk = 35
 
     defaultConfig {
+        // The app is called Vodo, but this id and the class names stay: Android keys the
+        // accessibility grant and the update chain to them, and changing either would mean
+        // re-granting everything and a fresh install.
         applicationId = "com.zaynikhlaq.dodostt"
         minSdk = 29
         targetSdk = 35

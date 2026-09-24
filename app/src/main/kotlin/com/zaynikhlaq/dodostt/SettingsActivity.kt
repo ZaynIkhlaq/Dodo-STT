@@ -25,6 +25,9 @@ class SettingsActivity : Activity() {
     private lateinit var barRow: View
     private lateinit var recordRow: View
     private lateinit var recordDivider: View
+    private lateinit var batteryRow: View
+    private lateinit var batteryDivider: View
+    private lateinit var batteryState: TextView
     private lateinit var micState: TextView
     private lateinit var barState: TextView
     private lateinit var recordState: TextView
@@ -55,13 +58,16 @@ class SettingsActivity : Activity() {
         barRow = findViewById(R.id.bar_row)
         recordRow = findViewById(R.id.record_row)
         recordDivider = findViewById(R.id.record_divider)
+        batteryRow = findViewById(R.id.battery_row)
+        batteryDivider = findViewById(R.id.battery_divider)
+        batteryState = findViewById(R.id.battery_state)
         micState = findViewById(R.id.mic_state)
         barState = findViewById(R.id.bar_state)
         recordState = findViewById(R.id.record_state)
         barTitle = findViewById(R.id.bar_title)
         barHealth = findViewById(R.id.bar_health)
         findViewById<Button>(R.id.bar_settings).setOnClickListener {
-            runCatching { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+            runCatching { startActivity(Setup.accessibilityIntent(this)) }
         }
         keyField = findViewById(R.id.key)
         keyState = findViewById(R.id.key_state)
@@ -86,17 +92,17 @@ class SettingsActivity : Activity() {
         micState.setText(R.string.step_mic_why)
         barState.setText(R.string.step_bar_why)
         recordState.setText(R.string.step_record_why)
+        batteryState.setText(R.string.step_battery_why)
 
         findViewById<Button>(R.id.mic_action).setOnClickListener { askForMic() }
         findViewById<Button>(R.id.bar_action).setOnClickListener {
-            runCatching { startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)) }
+            runCatching { startActivity(Setup.accessibilityIntent(this)) }
         }
         findViewById<Button>(R.id.record_action).setOnClickListener {
-            runCatching {
-                startActivity(
-                    Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
-                )
-            }
+            runCatching { startActivity(Setup.overlayIntent(this)) }
+        }
+        findViewById<Button>(R.id.battery_action).setOnClickListener {
+            runCatching { startActivity(Setup.batteryIntent(this)) }
         }
 
         // The key is written to the vault on focus loss, on Test, and on pause — not per keystroke.
@@ -147,13 +153,18 @@ class SettingsActivity : Activity() {
         val micTodo = !Setup.hasMic(this)
         val barTodo = !Setup.barOn(this)
         val recordTodo = !Setup.canRecordInBackground(this)
+        val batteryTodo = !Setup.batteryUnrestricted(this)
         micRow.visibility = if (micTodo) View.VISIBLE else View.GONE
         barRow.visibility = if (barTodo) View.VISIBLE else View.GONE
         recordRow.visibility = if (recordTodo) View.VISIBLE else View.GONE
+        batteryRow.visibility = if (batteryTodo) View.VISIBLE else View.GONE
+        // A hairline only where two visible rows meet.
         setupDivider.visibility = if (micTodo && barTodo) View.VISIBLE else View.GONE
         recordDivider.visibility = if (recordTodo && (micTodo || barTodo)) View.VISIBLE else View.GONE
+        batteryDivider.visibility =
+            if (batteryTodo && (micTodo || barTodo || recordTodo)) View.VISIBLE else View.GONE
         renderBar(barTodo, recordTodo)
-        val any = micTodo || barTodo || recordTodo
+        val any = micTodo || barTodo || recordTodo || batteryTodo
         setupLabel.visibility = if (any) View.VISIBLE else View.GONE
         setupGroup.visibility = if (any) View.VISIBLE else View.GONE
         renderUpdates()
@@ -165,17 +176,17 @@ class SettingsActivity : Activity() {
      */
     private fun renderBar(barTodo: Boolean, recordTodo: Boolean) {
         barTitle.setText(if (barTodo) R.string.bar_off else R.string.bar_on)
-        val error = BarStatus.lastError
+        val error = TabStatus.lastError
         val health = when {
             barTodo -> getString(R.string.bar_off_why)
             error != null -> getString(R.string.bar_failed, error)
-            !BarStatus.connected -> getString(R.string.bar_stalled)
+            !TabStatus.connected -> getString(R.string.bar_stalled)
             recordTodo -> getString(R.string.bar_no_record)
-            BarStatus.showing -> getString(R.string.bar_showing)
+            TabStatus.showing -> getString(R.string.bar_showing)
             else -> getString(R.string.bar_waiting)
         }
         barHealth.text = health
-        val warn = barTodo || recordTodo || error != null || !BarStatus.connected
+        val warn = barTodo || recordTodo || error != null || !TabStatus.connected
         barHealth.setTextColor(getColor(if (warn) R.color.warn else R.color.text_secondary))
     }
 

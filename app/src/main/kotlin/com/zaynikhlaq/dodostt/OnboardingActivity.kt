@@ -235,9 +235,10 @@ class OnboardingActivity : Activity() {
      */
     private fun barReady() = Setup.barOn(this) && Setup.canRecordInBackground(this)
 
+    /** Each button lands on the exact page for the switch that is still off. */
     private fun openBarSettings() {
-        if (!Setup.barOn(this)) open(Settings.ACTION_ACCESSIBILITY_SETTINGS, null)
-        else open(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+        val intent = if (!Setup.barOn(this)) Setup.accessibilityIntent(this) else Setup.overlayIntent(this)
+        runCatching { startActivity(intent) }
     }
 
     private fun commitKey() {

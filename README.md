@@ -1,36 +1,40 @@
-# Dodo STT
+# Vodo
 
 Fast, accurate voice typing for Android, powered by [Groq](https://groq.com)'s Whisper.
 
-Dodo STT is a button, not a keyboard. Keep the keyboard you already use — Samsung's, Gboard,
-whatever — and Dodo docks a small tile against the edge of the screen. Hold it, talk, let go, and
-what you said is typed where your cursor is.
+Vodo is a button, not a keyboard. Keep the keyboard you already use — Samsung's, Gboard, whatever —
+and Vodo docks a small tile against the edge of the screen. Hold it, talk, let go, and what you said
+is typed where your cursor is.
+
+The tile has three states and no more: a mic at rest, a level rail and a clock while it listens, and
+a quiet sweep while Groq works. It never changes colour; red is rationed to a dot and a hairline.
 
 - **Accurate.** Uses Whisper large v3 (turbo by default), not the phone's built-in recognizer.
 - **Fast.** Groq returns a transcript in about a second.
-- **Out of the way.** Your keyboard, your layout, your muscle memory. Dodo adds one pill above it.
-- **Simple.** One bar, one settings screen. No account, no subscription.
+- **Out of the way.** Your keyboard, your layout, your muscle memory. Vodo adds one tile beside it.
+- **Simple.** One tile, one settings screen. No account, no subscription.
 - **Yours.** You bring your own Groq API key. Groq's free tier covers normal dictation.
 
 ## Install
 
-1. Download `dodo-stt.apk` from the [latest release](https://github.com/ZaynIkhlaq/Dodo-STT/releases/latest)
+1. Download `dodo-stt.apk` from the [latest release](https://github.com/ZaynIkhlaq/Vodo-STT/releases/latest)
    and open it. Android asks you to allow installs from your browser; Play Protect may say the app is
    unknown because it is not on the Play Store.
-2. Open **Dodo STT**. It walks you through what it needs, one step at a time: the microphone, the
-   bar itself, and a Groq key.
-3. The bar step asks for two switches. **Accessibility** is what puts the bar above your keyboard and
+2. Open **Vodo**. It walks you through what it needs, one step at a time: the microphone, the
+   tile itself, and a Groq key. Every button goes straight to the exact settings page for the
+   switch that is still off.
+3. The tile step asks for two switches. **Accessibility** is what puts the bar above your keyboard and
    lets it type into the field you are in — Android has no other way for an app to do either. **Display
    over other apps** is not used to draw anything; it is the exemption Android requires before it will
    hand an app the microphone from inside somebody else's app.
 4. The key step links straight to [console.groq.com/keys](https://console.groq.com/keys). Paste the
    key in and tap **Test**.
-5. Under **Updates**, tap **Allow** once. After that Dodo installs its own updates: it checks GitHub
+5. Under **Updates**, tap **Allow** once. After that Vodo installs its own updates: it checks GitHub
    hourly, downloads anything newer, and installs it about ten seconds after you stop dictating.
 
 ## Use
 
-1. Tap any text field. Dodo's tile appears against the edge of the screen, beside your keyboard.
+1. Tap any text field. Vodo's tile appears against the edge of the screen, beside your keyboard.
 2. **Hold it and talk.** Let go and what you said is typed at your cursor.
 3. Or **double-tap** to lock it listening, hands free, and tap once to finish.
 
@@ -47,7 +51,7 @@ speech comes back in about a second, and the transcript is better for having hea
 |---|---|
 | Model | **Turbo** is fastest. **Large v3** is slightly more accurate and slightly slower. |
 | Language | **English** avoids accented English being mistaken for another language. **Automatic** handles any language Whisper supports. |
-| Updates | Shows the installed version, and grants Dodo permission to install its own updates. |
+| Updates | Shows the installed version, and grants Vodo permission to install its own updates. |
 
 Setup steps only appear on this screen while something still needs doing; once everything is granted,
 that block disappears.

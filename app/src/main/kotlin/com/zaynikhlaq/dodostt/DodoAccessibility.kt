@@ -24,16 +24,14 @@ import kotlin.math.abs
 import kotlin.math.hypot
 
 /**
- * What the bar is doing, for the settings screen to report. A phone has no logcat, so without this
+ * What the tile is doing, for the settings screen to report. A phone has no logcat, so without this
  * a button that never appears gives the user nothing to go on.
  */
-object BarStatus {
+object TabStatus {
     /** The service is switched on and running. */
     @Volatile var connected = false
-    /** The button is on screen right now. */
+    /** The tile is on screen right now. */
     @Volatile var showing = false
-    /** A keyboard was visible the last time the button looked. */
-    @Volatile var keyboardSeen = false
     /** Why the window wouldn't go up, if it wouldn't. */
     @Volatile var lastError: String? = null
 }
@@ -115,8 +113,8 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
             y = Prefs.orbY(this@DodoAccessibility, defaultY())
         }
         build()
-        BarStatus.connected = true
-        BarStatus.lastError = null
+        TabStatus.connected = true
+        TabStatus.lastError = null
         Updater.schedule(this)
     }
 
@@ -128,7 +126,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     override fun onInterrupt() = Unit
 
     override fun onUnbind(intent: Intent?): Boolean {
-        BarStatus.connected = false
+        TabStatus.connected = false
         dictation.destroy()
         hide()
         handler.removeCallbacksAndMessages(null)
@@ -154,6 +152,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     private fun onOrbTouch(event: MotionEvent): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                tab?.pressed = true
                 downX = event.rawX
                 downY = event.rawY
                 startY = params.y
@@ -183,6 +182,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
                 }
             }
             MotionEvent.ACTION_UP -> {
+                tab?.pressed = false
                 handler.removeCallbacks(hold)
                 when {
                     pushing -> release()
@@ -191,6 +191,7 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
                 }
             }
             MotionEvent.ACTION_CANCEL -> {
+                tab?.pressed = false
                 handler.removeCallbacks(hold)
                 if (pushing) release()
             }
@@ -314,7 +315,6 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
     private val refresh = Runnable {
         val live = dictation.state != Dictation.State.IDLE
         val keyboardTop = keyboardTop()
-        BarStatus.keyboardSeen = keyboardTop > 0
         // A keyboard on screen is enough: some apps never report a focused node, and hiding the
         // button in those is worse than showing one that can't start.
         val wanted = live || pendingInsert != null || keyboardTop > 0 || focusedEditable() != null
@@ -327,17 +327,17 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         runCatching { wm.addView(view, params) }
             .onSuccess {
                 attachedToWindow = true
-                BarStatus.showing = true
-                BarStatus.lastError = null
+                TabStatus.showing = true
+                TabStatus.lastError = null
             }
-            .onFailure { BarStatus.lastError = it.message ?: it.javaClass.simpleName }
+            .onFailure { TabStatus.lastError = it.message ?: it.javaClass.simpleName }
     }
 
     private fun hide() {
         val view = tab ?: return
         if (!attachedToWindow) return
         attachedToWindow = false
-        BarStatus.showing = false
+        TabStatus.showing = false
         runCatching { wm.removeView(view) }
     }
 
@@ -361,8 +361,8 @@ class DodoAccessibility : AccessibilityService(), Dictation.Sink {
         val state = dictation.state
         tab?.mode = when (state) {
             Dictation.State.IDLE -> DodoTab.Mode.IDLE
-            Dictation.State.RECORDING -> DodoTab.Mode.RECORDING
-            Dictation.State.TRANSCRIBING -> DodoTab.Mode.BUSY
+            Dictation.State.RECORDING -> DodoTab.Mode.LISTENING
+            Dictation.State.TRANSCRIBING -> DodoTab.Mode.WORKING
         }
         val held = pendingInsert
         when {
