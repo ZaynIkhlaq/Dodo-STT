@@ -1,10 +1,10 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp" android:height="24dp"
     android:viewportWidth="24" android:viewportHeight="24">
-    <!-- The mark: ink body, amber beak. Rebuilt from clean curves rather than traced, so the beak's cap is a true
+    <!-- The mark on a dark screen: the body inverts, the beak does not. Rebuilt from clean curves rather than traced, so the beak's cap is a true
          semicircle and the body's hook is one sweep. -->
-    <path android:fillColor="#0B0B0D" android:pathData="M11.0,2.05 L11.0,17.6 C11.0,19.3 9.3,21.1 6.15,21.62 C3.35,21.95 1.15,20.6 1.0,19.3 C0.9,18.5 2.25,17.6 4.45,17.15 L4.45,6.6 C4.5,3.95 7.0,2.05 11.0,2.05 Z" />
+    <path android:fillColor="#F2F1EE" android:pathData="M11.0,2.05 L11.0,17.6 C11.0,19.3 9.3,21.1 6.15,21.62 C3.35,21.95 1.15,20.6 1.0,19.3 C0.9,18.5 2.25,17.6 4.45,17.15 L4.45,6.6 C4.5,3.95 7.0,2.05 11.0,2.05 Z" />
     <path android:fillColor="#F7B500" android:pathData="M11.0,2.05 L19.55,2.05 C21.85,2.05 22.8,3.15 22.8,4.35 C22.8,5.55 21.85,6.65 19.55,6.65 L11.0,6.65 Z" />
     <path android:fillColor="#FFFFFF" android:pathData="M8.2,4.3 a1.0,1.0 0 1,0 0.02,0 Z" />
-    <path android:fillColor="#0B0B0D" android:pathData="M8.25,5.08 a0.38,0.38 0 1,0 0.01,0 Z" />
+    <path android:fillColor="#F2F1EE" android:pathData="M8.25,5.08 a0.38,0.38 0 1,0 0.01,0 Z" />
 </vector>

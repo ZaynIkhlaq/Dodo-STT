@@ -43,8 +43,14 @@
     <string name="ob_key_get">Get a free key</string>
 
     <string name="ob_done_title">You\'re set</string>
-    <string name="ob_done_body">Tap any text field and Vodo\'s button appears at the edge of the screen. Hold it, speak, then tap it, and your words land in the field. Drag it wherever you like.</string>
-    <string name="ob_done_gestures">Hold the button and talk. Let go and it types.\n\nDouble-tap to lock it listening, hands free. Tap once to finish.\n\nDrag it anywhere along either edge.</string>
+    <string name="ob_done_body">Tap any text field and Vodo appears at the edge of the screen.</string>
+    <string name="gesture_hold_key">Hold</string>
+    <string name="gesture_hold">Talk, let go, it types</string>
+    <string name="gesture_double_key">Double-tap</string>
+    <string name="gesture_double">Hands free, tap to finish</string>
+    <string name="gesture_drag_key">Drag</string>
+    <string name="gesture_drag">Park it on either edge</string>
+
     <string name="ob_done_action">Start using Vodo</string>
     <string name="ob_skip">Skip for now</string>
 
