@@ -37,11 +37,11 @@ object TabStatus {
 }
 
 /**
- * Dodo as a button on the edge of the screen: your own keyboard stays exactly as it is, and
+ * Doodoo as a button on the edge of the screen: your own keyboard stays exactly as it is, and
  * dictation is one disc parked against the side, out of the way of the keys.
  *
  * Android runs one input method at a time and gives no way to add anything to somebody else's
- * keyboard, so the only place Dodo can live is a window of its own. An accessibility service is what
+ * keyboard, so the only place Doodoo can live is a window of its own. An accessibility service is what
  * makes that work: its overlay window is layered above the keyboard — an ordinary "draw over other
  * apps" window is layered *below* it — and it is also the only way to put text into a field this app
  * doesn't own.

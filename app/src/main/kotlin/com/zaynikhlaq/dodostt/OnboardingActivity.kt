@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +16,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.window.OnBackInvokedCallback
+import android.window.OnBackInvokedDispatcher
 
 /**
  * Setup as five steps rather than one long screen: welcome, microphone, the bar, Groq key,
@@ -47,6 +50,9 @@ class OnboardingActivity : Activity() {
      * stepping back onto an already-satisfied step doesn't bounce the user forward again.
      */
     private var armed = -1
+
+    /** Back steps back through setup. Registered only past the first step, so the first exits normally. */
+    private var backCallback: Any? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,6 +93,7 @@ class OnboardingActivity : Activity() {
         findViewById<Button>(R.id.key_test).setOnClickListener { testKey() }
         findViewById<Button>(R.id.key_get).setOnClickListener { open("https://console.groq.com/keys") }
         render()
+        syncBack()
     }
 
     override fun onResume() {
@@ -114,8 +121,24 @@ class OnboardingActivity : Activity() {
         if (armed == MIC && step == MIC && Setup.hasMic(this)) advanceShortly()
     }
 
+    /** Android 12 and older. From 13 the system calls [syncBack]'s callback instead. */
+    @Deprecated("Superseded by OnBackInvokedCallback from Android 13")
     override fun onBackPressed() {
         if (step == WELCOME) super.onBackPressed() else goTo(step - 1)
+    }
+
+    private fun syncBack() {
+        if (Build.VERSION.SDK_INT < 33) return
+        val wanted = step != WELCOME
+        val current = backCallback as OnBackInvokedCallback?
+        if (wanted && current == null) {
+            val callback = OnBackInvokedCallback { goTo(step - 1) }
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback)
+            backCallback = callback
+        } else if (!wanted && current != null) {
+            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(current)
+            backCallback = null
+        }
     }
 
     override fun onDestroy() {
@@ -166,6 +189,7 @@ class OnboardingActivity : Activity() {
             else -> -1
         }
         render()
+        syncBack()
     }
 
     private fun finishOnboarding() {
@@ -237,7 +261,13 @@ class OnboardingActivity : Activity() {
 
     /** Each button lands on the exact page for the switch that is still off. */
     private fun openBarSettings() {
-        val intent = if (!Setup.barOn(this)) Setup.accessibilityIntent(this) else Setup.overlayIntent(this)
+        val intent = if (!Setup.barOn(this)) {
+            // This step is the accessibility disclosure, and its button reads "Agree and open settings".
+            Prefs.setAccessibilityConsented(this)
+            Setup.accessibilityIntent(this)
+        } else {
+            Setup.overlayIntent(this)
+        }
         runCatching { startActivity(intent) }
     }
 

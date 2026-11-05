@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import android.text.format.DateUtils
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -35,9 +34,7 @@ class SettingsActivity : Activity() {
     private lateinit var barHealth: TextView
     private lateinit var keyField: EditText
     private lateinit var keyState: TextView
-    private lateinit var updateTitle: TextView
-    private lateinit var updateState: TextView
-    private lateinit var updateAction: Button
+    private lateinit var updates: UpdateCard
 
     private var askedForMic = false
 
@@ -67,27 +64,11 @@ class SettingsActivity : Activity() {
         barTitle = findViewById(R.id.bar_title)
         barHealth = findViewById(R.id.bar_health)
         findViewById<Button>(R.id.bar_settings).setOnClickListener {
-            runCatching { startActivity(Setup.accessibilityIntent(this)) }
+            Setup.openAccessibility(this)
         }
         keyField = findViewById(R.id.key)
         keyState = findViewById(R.id.key_state)
-        updateTitle = findViewById(R.id.update_title)
-        updateState = findViewById(R.id.update_state)
-        updateAction = findViewById(R.id.update_action)
-
-        Updater.schedule(this)
-        updateAction.setOnClickListener {
-            if (!Updater.canInstall(this)) {
-                runCatching {
-                    startActivity(
-                        Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:$packageName"))
-                    )
-                }
-            } else {
-                Updater.checkNow(this) { if (!isDestroyed) renderUpdates() }
-                renderUpdates()
-            }
-        }
+        updates = UpdateCard(this, findViewById(R.id.update_title), findViewById(R.id.update_state), findViewById(R.id.update_action))
 
         micState.setText(R.string.step_mic_why)
         barState.setText(R.string.step_bar_why)
@@ -96,7 +77,7 @@ class SettingsActivity : Activity() {
 
         findViewById<Button>(R.id.mic_action).setOnClickListener { askForMic() }
         findViewById<Button>(R.id.bar_action).setOnClickListener {
-            runCatching { startActivity(Setup.accessibilityIntent(this)) }
+            Setup.openAccessibility(this)
         }
         findViewById<Button>(R.id.record_action).setOnClickListener {
             runCatching { startActivity(Setup.overlayIntent(this)) }
@@ -167,7 +148,7 @@ class SettingsActivity : Activity() {
         val any = micTodo || barTodo || recordTodo || batteryTodo
         setupLabel.visibility = if (any) View.VISIBLE else View.GONE
         setupGroup.visibility = if (any) View.VISIBLE else View.GONE
-        renderUpdates()
+        updates.render()
     }
 
     /**
@@ -188,27 +169,6 @@ class SettingsActivity : Activity() {
         barHealth.text = health
         val warn = barTodo || recordTodo || error != null || !TabStatus.connected
         barHealth.setTextColor(getColor(if (warn) R.color.warn else R.color.text_secondary))
-    }
-
-    private fun renderUpdates() {
-        updateTitle.text = getString(R.string.update_version, Updater.installedName(this))
-        val allowed = Updater.canInstall(this)
-        val waiting = Updater.waiting
-        val error = Updater.lastError
-        updateState.text = when {
-            !allowed -> getString(R.string.update_needs_permission)
-            Updater.isChecking -> getString(R.string.update_checking)
-            error != null -> getString(R.string.update_failed, error)
-            waiting != null -> getString(R.string.update_waiting, waiting)
-            Updater.checkedAt > 0 -> getString(
-                R.string.update_current,
-                DateUtils.getRelativeTimeSpanString(Updater.checkedAt, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS),
-            )
-            else -> getString(R.string.update_auto)
-        }
-        updateState.setTextColor(getColor(if (!allowed || error != null) R.color.warn else R.color.text_secondary))
-        updateAction.setText(if (allowed) R.string.update_check else R.string.update_allow)
-        updateAction.isEnabled = !Updater.isChecking
     }
 
     private fun askForMic() {

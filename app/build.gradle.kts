@@ -10,17 +10,35 @@ val buildNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInt()
 
 android {
     namespace = "com.zaynikhlaq.dodostt"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
-        // The app is called Vodo, but this id and the class names stay: Android keys the
+        // The app is called Doodoo, but this id and the class names stay: Android keys the
         // accessibility grant and the update chain to them, and changing either would mean
         // re-granting everything and a fresh install.
         applicationId = "com.zaynikhlaq.dodostt"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = buildNumber
         versionName = "1.0.$buildNumber"
+    }
+
+    // Two builds of the same app. "play" is what goes to Google Play, which updates it and forbids an
+    // app updating itself. "github" is the APK published under Releases, which keeps itself current.
+    flavorDimensions += "store"
+    productFlavors {
+        create("play") {
+            dimension = "store"
+            buildConfigField("boolean", "PLAY", "true")
+        }
+        create("github") {
+            dimension = "store"
+            buildConfigField("boolean", "PLAY", "false")
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     signingConfigs {

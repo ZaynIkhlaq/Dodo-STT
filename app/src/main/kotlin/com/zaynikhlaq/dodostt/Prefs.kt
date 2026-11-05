@@ -47,6 +47,11 @@ object Prefs {
     fun language(c: Context): String = sp(c).getString("language", "en").orEmpty()
     fun setLanguage(c: Context, v: String) = sp(c).edit().putString("language", v).apply()
 
+    /** True once the user has agreed to the accessibility disclosure, which Play requires before the switch. */
+    fun accessibilityConsented(c: Context): Boolean = sp(c).getBoolean("a11y_consent", false)
+
+    fun setAccessibilityConsented(c: Context) = sp(c).edit().putBoolean("a11y_consent", true).apply()
+
     /** True once Android has refused to install an update quietly; after that, always ask. */
     fun updateNeedsConfirm(c: Context): Boolean = sp(c).getBoolean("update_confirm", false)
 

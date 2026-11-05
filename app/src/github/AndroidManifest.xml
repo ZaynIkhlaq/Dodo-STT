@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The GitHub build updates itself from this repository's releases. Google Play doesn't allow that,
+     so none of this is in the Play build. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Self-updating from GitHub releases. The second lets Android 12+ skip the confirm dialog, and
+         the third keeps the hourly check registered across reboots. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.UPDATE_PACKAGES_WITHOUT_USER_ACTION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!-- Asked for outright, because a phone that suspends Doodoo leaves no tile and no clue why. The
+         Play build sends people to the app's own settings page instead. -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <application>
+        <service
+            android:name=".UpdateJob"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <receiver
+            android:name=".InstallStatusReceiver"
+            android:exported="false" />
+
+        <!-- Exported only so the system can deliver MY_PACKAGE_REPLACED; nobody else can send it. -->
+        <receiver
+            android:name=".UpdatedReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>

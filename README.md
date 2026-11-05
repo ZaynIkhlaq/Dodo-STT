@@ -1,9 +1,9 @@
-# Vodo
+# Doodoo
 
 Fast, accurate voice typing for Android, powered by [Groq](https://groq.com)'s Whisper.
 
-Vodo is a button, not a keyboard. Keep the keyboard you already use — Samsung's, Gboard, whatever —
-and Vodo docks a small tile against the edge of the screen. Hold it, talk, let go, and what you said
+Doodoo is a button, not a keyboard. Keep the keyboard you already use — Samsung's, Gboard, whatever —
+and Doodoo docks a small tile against the edge of the screen. Hold it, talk, let go, and what you said
 is typed where your cursor is.
 
 The tile has three states and no more: a mic at rest, a level rail and a clock while it listens, and
@@ -11,30 +11,39 @@ a quiet sweep while Groq works. It never changes colour; red is rationed to a do
 
 - **Accurate.** Uses Whisper large v3 (turbo by default), not the phone's built-in recognizer.
 - **Fast.** Groq returns a transcript in about a second.
-- **Out of the way.** Your keyboard, your layout, your muscle memory. Vodo adds one tile beside it.
+- **Out of the way.** Your keyboard, your layout, your muscle memory. Doodoo adds one tile beside it.
 - **Simple.** One tile, one settings screen. No account, no subscription.
 - **Yours.** You bring your own Groq API key. Groq's free tier covers normal dictation.
 
 ## Install
 
-1. Download `dodo-stt.apk` from the [latest release](https://github.com/ZaynIkhlaq/Vodo-STT/releases/latest)
-   and open it. Android asks you to allow installs from your browser; Play Protect may say the app is
-   unknown because it is not on the Play Store.
-2. Open **Vodo**. It walks you through what it needs, one step at a time: the microphone, the
+Doodoo comes in two builds of the same app:
+
+- **Google Play.** Install it from Play like any other app, and Play keeps it updated. Use this one if
+  your bank app objects to accessibility services that weren't installed from the Play Store.
+- **GitHub.** Download `dodo-stt.apk` from the [latest release](https://github.com/ZaynIkhlaq/Dodo-STT/releases/latest)
+  and open it. Android asks you to allow installs from your browser, and Play Protect may say the app
+  is unknown. This build updates itself: under **Updates**, tap **Allow** once, and after that it
+  checks GitHub hourly and installs anything newer about ten seconds after you stop dictating.
+
+The two are signed differently, so switching from one to the other means uninstalling first.
+
+Then:
+
+1. Open **Doodoo**. It walks you through what it needs, one step at a time: the microphone, the
    tile itself, and a Groq key. Every button goes straight to the exact settings page for the
    switch that is still off.
-3. The tile step asks for two switches. **Accessibility** is what puts the bar above your keyboard and
-   lets it type into the field you are in — Android has no other way for an app to do either. **Display
-   over other apps** is not used to draw anything; it is the exemption Android requires before it will
+2. The tile step asks for two switches. **Accessibility** is what puts the bar above your keyboard and
+   lets it type into the field you are in — Android has no other way for an app to do either. Doodoo
+   explains what it does with it, and asks you to agree, before sending you there. **Display over
+   other apps** is not used to draw anything; it is the exemption Android requires before it will
    hand an app the microphone from inside somebody else's app.
-4. The key step links straight to [console.groq.com/keys](https://console.groq.com/keys). Paste the
+3. The key step links straight to [console.groq.com/keys](https://console.groq.com/keys). Paste the
    key in and tap **Test**.
-5. Under **Updates**, tap **Allow** once. After that Vodo installs its own updates: it checks GitHub
-   hourly, downloads anything newer, and installs it about ten seconds after you stop dictating.
 
 ## Use
 
-1. Tap any text field. Vodo's tile appears against the edge of the screen, beside your keyboard.
+1. Tap any text field. Doodoo's tile appears against the edge of the screen, beside your keyboard.
 2. **Hold it and talk.** Let go and what you said is typed at your cursor.
 3. Or **double-tap** to lock it listening, hands free, and tap once to finish.
 
@@ -51,7 +60,7 @@ speech comes back in about a second, and the transcript is better for having hea
 |---|---|
 | Model | **Turbo** is fastest. **Large v3** is slightly more accurate and slightly slower. |
 | Language | **English** avoids accented English being mistaken for another language. **Automatic** handles any language Whisper supports. |
-| Updates | Shows the installed version, and grants Vodo permission to install its own updates. |
+| Updates | Shows the installed version. In the GitHub build, also grants Doodoo permission to install its own updates. |
 
 Setup steps only appear on this screen while something still needs doing; once everything is granted,
 that block disappears.
@@ -62,8 +71,9 @@ that block disappears.
   your key. The recording is deleted from the phone as soon as it has been transcribed or discarded.
   How Groq handles it is covered by [Groq's privacy policy](https://groq.com/privacy-policy/).
 - There are no analytics, ads, accounts, or third-party libraries. The app talks to no server other
-  than Groq, and GitHub for updates: it reads the latest release of this repository and downloads the
-  APK, sending nothing about you. Android refuses any update not signed with the release key.
+  than Groq. The GitHub build also reads the latest release of this repository to update itself and
+  downloads the APK, sending nothing about you; Android refuses any update not signed with the
+  release key. The Play build is updated by Google Play and never contacts GitHub.
 - Your API key is encrypted with a key held in the Android Keystore and is excluded from cloud
   backups and phone-to-phone transfers. It never leaves the device except as the authorization header
   on requests to Groq.
@@ -71,9 +81,11 @@ that block disappears.
   and where to park the bar. It does not read what you type, keeps no record of any field, and sends
   nothing anywhere except the audio you dictate, to Groq.
 
+Full policy: [zaynikhlaq.com/doodoo](https://zaynikhlaq.com/doodoo).
+
 ## Build
 
-Requires JDK 17 and the Android SDK (API 35). There is no Gradle wrapper in the repo; use Gradle 8.11+.
+Requires JDK 17 and the Android SDK (API 36). There is no Gradle wrapper in the repo; use Gradle 8.11+.
 The app has no third-party dependencies — not AppCompat, not Material — so every control on screen is
 either a framework widget or a custom `View` in this repo.
 
@@ -82,10 +94,19 @@ where that text goes. `DodoAccessibility` is the button: an accessibility overla
 the only window type Android layers *above* the keyboard, plus `ACTION_SET_TEXT` on the focused node
 to type. `DodoTab` is the tile, one view that changes shape rather than a set that come and go.
 
+There are two flavors. `play` leaves out the self-updater (`src/github`) and its permissions, and
+asks for the battery exemption through the app's settings page rather than directly, because Play
+allows neither. `github` is everything.
+
 ```bash
-gradle :app:assembleDebug
+gradle :app:assembleGithubDebug     # sideloadable APK
+gradle :app:bundlePlayRelease       # the bundle Google Play takes
 ```
 
-Pushes to `main` are built by GitHub Actions, signed, and published under Releases. The signing key
-lives in the repository's encrypted secrets, so forks build unsigned APKs unless they add their own
-`SIGNING_KEYSTORE_B64` (a base64 PKCS12 keystore with alias `dodostt`) and `SIGNING_PASSWORD`.
+Pushes to `main` are built by GitHub Actions and signed. The GitHub APK is published under Releases,
+and the Play bundle is kept as a workflow artifact and, once `PLAY_SERVICE_ACCOUNT_JSON` is set,
+uploaded to Play's internal testing track (as a draft until the repository variable
+`PLAY_RELEASE_STATUS` is `completed`). Runs on other branches build but publish nothing. The signing
+key lives in the repository's encrypted secrets, so forks build unsigned unless they add their own
+`SIGNING_KEYSTORE_B64` (a base64 PKCS12 keystore with alias `dodostt`) and `SIGNING_PASSWORD`. For
+Play, that key is the upload key; Play signs what it distributes with its own.

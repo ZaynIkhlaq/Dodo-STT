@@ -22,11 +22,11 @@ import java.net.URL
 import java.util.concurrent.Executors
 
 /**
- * Keeps Dodo on the latest GitHub release without a trip to the browser.
+ * Keeps Doodoo on the latest GitHub release without a trip to the browser.
  *
  * Every push to main publishes a signed APK whose tag ends in the build number, and the build
  * number is the versionCode, so "is there something newer" is one integer comparison. A newer APK is
- * downloaded in the background and installed through PackageInstaller the next time Dodo is idle —
+ * downloaded in the background and installed through PackageInstaller the next time Doodoo is idle —
  * never mid-dictation, because installing kills the process the bar is running in.
  *
  * From Android 12 an app updating itself can skip the confirmation dialog once the user has let it
@@ -126,7 +126,7 @@ object Updater {
     }
 
     /**
-     * Dodo reports when a dictation is running. The moment one isn't, a waiting update goes in.
+     * Doodoo reports when a dictation is running. The moment one isn't, a waiting update goes in.
      * (Stranded text doesn't hold it up — that is already on the clipboard.)
      */
     fun setDictating(c: Context, busy: Boolean) {
@@ -261,7 +261,7 @@ object Updater {
 
     /**
      * [silent] asks Android to skip the confirm dialog. It only grants that to an app whose own
-     * installer it recognises, and a sideloaded Dodo has none — so the first refusal turns this off
+     * installer it recognises, and a sideloaded Doodoo has none — so the first refusal turns this off
      * for good and every update after it asks, which is one tap and always works.
      */
     private fun install(c: Context, apk: File, silent: Boolean = !Prefs.updateNeedsConfirm(c)) {
@@ -299,7 +299,7 @@ object Updater {
                 @Suppress("DEPRECATION")
                 val confirm = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT) ?: return
                 confirm.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // Works when Dodo's settings are on screen; otherwise Android blocks it and the
+                // Works when Doodoo's settings are on screen; otherwise Android blocks it and the
                 // notification is the way in.
                 runCatching { c.startActivity(confirm) }
                 notifyConfirm(c, confirm)
@@ -336,7 +336,7 @@ object Updater {
             manager.notify(
                 NOTIFICATION_ID,
                 Notification.Builder(c, CHANNEL)
-                    .setSmallIcon(R.drawable.ic_vodo_mono)
+                    .setSmallIcon(R.drawable.ic_doodoo_mono)
                     .setContentTitle(c.getString(R.string.notif_update_title))
                     .setContentText(c.getString(R.string.notif_update_body))
                     .setContentIntent(tap)

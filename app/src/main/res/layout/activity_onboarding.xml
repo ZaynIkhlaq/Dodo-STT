@@ -49,7 +49,7 @@
                 android:layout_width="96dp"
                 android:layout_height="96dp"
                 android:contentDescription="@string/cd_mark"
-                android:src="@drawable/ic_vodo" />
+                android:src="@drawable/ic_doodoo" />
 
             <TextView
                 style="@style/Display"

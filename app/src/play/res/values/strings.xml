@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Where the Play build differs: it can't ask for the battery exemption directly, and is never locked
+     behind restricted settings. -->
+<resources>
+    <string name="step_battery_why">Open, then set Battery to Unrestricted, or Samsung will suspend Doodoo</string>
+    <!-- Play installs never get the "restricted settings" lock that sideloaded ones do. -->
+    <string name="ob_bar_path">The button below opens Doodoo\'s own page. Turn it on there, then come back.</string>
+</resources>
