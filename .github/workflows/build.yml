@@ -75,5 +75,5 @@ jobs:
           packageName: com.zaynikhlaq.dodostt
           releaseFiles: app/build/outputs/bundle/playRelease/app-play-release.aab
           releaseName: 1.0.${{ github.run_number }}
-          track: internal
+          tracks: internal
           status: ${{ vars.PLAY_RELEASE_STATUS || 'draft' }}
