@@ -29,8 +29,10 @@ class DodoTab @JvmOverloads constructor(context: Context, attrs: AttributeSet? =
 
     enum class Mode { IDLE, LISTENING, WORKING }
 
-    private val density = resources.displayMetrics.density
-    private val scaled = resources.displayMetrics.scaledDensity
+    /** Everything below is drawn at this multiple of its nominal size: at 1.0 the tile was too small to hit without looking. */
+    private val scale = 1.2f
+    private val density = resources.displayMetrics.density * scale
+    private val scaled = resources.displayMetrics.scaledDensity * scale
     private fun dp(v: Float) = v * density
 
     /** The square itself. Everything else is measured off this. */

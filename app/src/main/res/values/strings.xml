@@ -37,7 +37,7 @@
     <string name="consent_agree">Agree</string>
     <string name="consent_later">Not now</string>
     <string name="ob_bar_enabled">The button is on</string>
-    <string name="ob_bar_path">The button below opens Doodoo\'s own page. If the switch there is greyed out, go to Apps → Doodoo → ⋮ → Allow restricted settings, then come back.</string>
+    <string name="ob_bar_path">The button below opens Doodoo\'s own page. Turn on the Doodoo switch and leave \"Doodoo shortcut\" off: the shortcut only adds a second floating button you don\'t need. If the switch is greyed out, go to Apps → Doodoo → ⋮ → Allow restricted settings, then come back.</string>
     <string name="ob_record_allowed">Recording from other apps is allowed</string>
     <string name="ob_record_action">Allow appear on top</string>
 
@@ -70,7 +70,7 @@
 
     <string name="section_bar">The button</string>
     <string name="bar_off">Off</string>
-    <string name="bar_off_why">Turn Doodoo on under Accessibility and the button appears beside your keyboard</string>
+    <string name="bar_off_why">Turn on the Doodoo switch under Accessibility (not the shortcut) and the button appears whenever you are typing</string>
     <string name="bar_on">On</string>
     <string name="bar_showing">On screen right now</string>
     <string name="bar_waiting">Tap a text field and it appears at the edge of the screen</string>
